@@ -1,0 +1,18 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body>
+    <form action="/post" method="post" enctype="multipart/form-data">
+<input type="text" placeholder="enter title" name="title">
+<textarea placeholder="enter your problem!" name="description" ></textarea>
+<input type="text" placeholder="enter location" name="location">
+<input type="file" name="image" class="border p-2 rounded w-full">
+<input type="submit" value="submit issue">
+    </form>
+</body>
+</html>
