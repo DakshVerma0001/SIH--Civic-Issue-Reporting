@@ -22,10 +22,7 @@ status:{
     enum:['Pending','In Progress','Resolved'],
     default:'Pending'
 },
-likes:[{    //array because bhot sare logo ne like kre hounge apne apni id se.
-    type:mongoose.Schema.Types.ObjectId,
-    ref:'user'
-}],
+
 createdBy:{
  type:mongoose.Schema.Types.ObjectId,
  ref:'user',

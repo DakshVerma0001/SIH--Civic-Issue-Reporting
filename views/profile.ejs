@@ -3,13 +3,34 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Document</title>
+    <title>Profile</title>
 </head>
 <body>
-    <h1> welcome, <%=user.name %></h1>
-    <p>email:<%= user.email %></p>
-    <p>Role:<%= user.role%></p>
-    <img src="/images/uploads/<%= user.profilepic%>" alt="">
-    
+    <h1>Welcome, <%= user.name %></h1>
+    <p>Email: <%= user.email %></p>
+    <p>Role: <%= user.role %></p>
+
+    <% if (user.profilepic) { %>
+        <img src="/uploads/<%= user.profilepic %>" alt="Profile pic" width="150">
+    <% } %>
+
+    <h2>Your Issues</h2>
+    <div class="issues-container">
+        <% if (issues && issues.length > 0) { %>
+            <% issues.forEach(issue => { %>
+                <div class="issue-card">
+                    <% if (issue.image) { %>
+                        <img src="/<%= issue.image %>" alt="Issue Image" width="200">
+                    <% } %>
+                    <h3><%= issue.title %></h3>
+                    <p><strong>Location:</strong> <%= issue.location %></p>
+                    <p><%= issue.description %></p>
+                    <p><strong>Status:</strong> <%= issue.status || "Pending" %></p>
+                </div>
+            <% }) %>
+        <% } else { %>
+            <p>No issues posted yet.</p>
+        <% } %>
+    </div>
 </body>
 </html>
