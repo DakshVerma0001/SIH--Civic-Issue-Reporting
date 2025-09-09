@@ -6,6 +6,11 @@ const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
 const multer = require("multer");
 const path = require("path");
+require("dotenv").config();
+if (!process.env.JWT_SECRET) {
+  console.error("FATAL: JWT_SECRET is missing. Set it in .env");
+  process.exit(1);
+}
 
 const app = express();
 
@@ -25,7 +30,7 @@ function isloggedin(req, res, next) {
     }
 
     try {
-        const data = jwt.verify(token, "ndobhal");
+        const data = jwt.verify(token, process.env.JWT_SECRET);
         req.user = data;
         next();
     } catch (err) {
@@ -49,7 +54,7 @@ app.post("/login", async function (req, res) {
 
     const token = jwt.sign(
         { email: userexist.email, id: userexist._id },
-        "ndobhal",
+        process.env.JWT_SECRET,
         { expiresIn: "7d" }
     );
 
@@ -165,6 +170,37 @@ app.post("/post", isloggedin, upload.single("image"), async function (req, res) 
 
     res.redirect("/profile");
 });
+
+//edit profile
+app.get("/profile/edit",isloggedin,async function(req,res){
+    const user=await userModel.findById(req.user.id);
+    res.render("editprofile",{user});
+});
+
+//handle edit profile form
+app.post("/profile/edit",isloggedin,upload.single("profilepic"),async function(req,res){
+    try{
+        const {name,email}=req.body;
+let updatedata={name,email};
+
+//if new pic uploaded
+if(req.file){
+updatedata.profilepic="/uploads/"+req.file.filename;
+}
+await userModel.findByIdAndUpdate(req.user.id,updatedata,{new:true})
+res.redirect("/profile");
+    }
+    catch(err){
+        console.log(err);
+        if(err.code === 11000){
+            return res.status(400).send("email already exists");
+        }
+      res.status(500).send("could not update profile");
+
+    }
+})
+
+
 
 // Server Listen
 app.listen(3000, () => {

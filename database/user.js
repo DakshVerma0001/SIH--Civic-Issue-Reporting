@@ -11,7 +11,7 @@ const userSchema= mongoose.Schema({
     password:{type:String,required:true} ,
     profilepic:{
         type:String,
-        default:"images/uploads/default.jpg"
+        default:"/images/uploads/default.jpg"
     },
 role:{type:String,enum:['citizen','admin','authority'],default:"citizen"},
 posts:[{

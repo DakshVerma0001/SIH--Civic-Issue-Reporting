@@ -6,14 +6,17 @@
     <title>Profile</title>
 </head>
 <body>
-    <h1>Welcome, <%= user.name %></h1>
-    <p>Email: <%= user.email %></p>
-    <p>Role: <%= user.role %></p>
+    
 
-    <% if (user.profilepic) { %>
-        <img src="/uploads/<%= user.profilepic %>" alt="Profile pic" width="150">
-    <% } %>
+  <img src="<%= user.profilepic ? user.profilepic : '/images/uploads/default.jpg' %>" 
+       alt="Profile pic" width="120" height="120">
 
+  <p>Name: <%= user.name %></p>
+  <p>Email: <%= user.email %></p>
+  <p>Role: <%= user.role %></p>
+
+  <a href="/profile/edit">Edit Profile</a>
+<a href="/logout">logout</a>
     <h2>Your Issues</h2>
     <div class="issues-container">
         <% if (issues && issues.length > 0) { %>
@@ -23,8 +26,8 @@
                         <img src="/<%= issue.image %>" alt="Issue Image" width="200">
                     <% } %>
                     <h3><%= issue.title %></h3>
+                     <p><%= issue.description %></p>
                     <p><strong>Location:</strong> <%= issue.location %></p>
-                    <p><%= issue.description %></p>
                     <p><strong>Status:</strong> <%= issue.status || "Pending" %></p>
                 </div>
             <% }) %>
