@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Admin Dashboard</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 20px;
+    }
+    h1 { color: #333; }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 20px;
+    }
+    table, th, td {
+      border: 1px solid #ccc;
+    }
+    th, td {
+      padding: 10px;
+      text-align: center;
+    }
+    select, button {
+      padding: 5px;
+    }
+    .analytics {
+      display: flex;
+      gap: 20px;
+      margin-bottom: 20px;
+    }
+    .card {
+      padding: 15px;
+      border: 1px solid #ccc;
+      border-radius: 5px;
+      width: 150px;
+      text-align: center;
+      background: #f9f9f9;
+    }
+  </style>
+</head>
+<body>
+  <h1>Admin Dashboard</h1>
+
+  <!-- Analytics Section -->
+  <div class="analytics">
+    <div class="card">
+      <h3>Pending</h3>
+      <p><%= pendingCount %></p>
+    </div>
+    <div class="card">
+      <h3>In Progress</h3>
+      <p><%= inProgressCount %></p>
+    </div>
+    <div class="card">
+      <h3>Resolved</h3>
+      <p><%= resolvedCount %></p>
+    </div>
+  </div>
+
+  <!-- Issues Table -->
+  <h2>All Issues</h2>
+  <table>
+    <tr>
+      <th>Title</th>
+      <th>Description</th>
+      <th>Location</th>
+      <th>Created By</th>
+      <th>Status</th>
+      <th>Action</th>
+    </tr>
+
+    <% issues.forEach(issue => { %>
+      <tr>
+        <td><%= issue.title %></td>
+        <td><%= issue.description %></td>
+        <td><%= issue.location %></td>
+        <td><%= issue.createdBy ? issue.createdBy.name : "Unknown" %></td>
+        <td><%= issue.status %></td>
+        <td>
+          <!-- Update Status -->
+          <form action="/admin/update/<%= issue._id %>" method="POST" style="display:inline;">
+            <select name="status">
+              <option value="Pending" <%= issue.status==="Pending"?"selected":"" %>>Pending</option>
+              <option value="In Progress" <%= issue.status==="In Progress"?"selected":"" %>>In Progress</option>
+              <option value="Resolved" <%= issue.status==="Resolved"?"selected":"" %>>Resolved</option>
+            </select>
+            <button type="submit">Update</button>
+          </form>
+
+          <!-- Delete Issue -->
+          <form action="/admin/delete/<%= issue._id %>" method="POST" style="display:inline;">
+            <button type="submit" style="background:red; color:white;">Delete</button>
+          </form>
+        </td>
+      </tr>
+    <% }) %>
+  </table>
+</body>
+</html>
