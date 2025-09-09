@@ -1,6 +1,6 @@
 const express = require('express');
 const userModel = require("./database/user");
-const issueModel=require("./database/issues");
+const issueModel = require("./database/issues");
 const cookieParser = require("cookie-parser");
 const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
@@ -14,17 +14,83 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(cookieParser());
 app.set("view engine", "ejs");
+app.use(express.static("public"));
 
-function isloggedin(req,res,next){
-    const token=req.cookies.token;
-    if(!token){
-        return res.status(401).send("please login first");
+// ----------------- MIDDLEWARE -----------------
+function isloggedin(req, res, next) {
+    const token = req.cookies.token;
+
+    if (!token) {
+        return res.redirect("/login");
     }
-    const data=jwt.verify(token,"ndobhal");
-    req.user=data;
-    next();
+
+    try {
+        const data = jwt.verify(token, "ndobhal");
+        req.user = data;
+        next();
+    } catch (err) {
+        return res.redirect("/login");
+    }
 }
 
+// ----------------- LOGIN -----------------
+app.post("/login", async function (req, res) {
+    let { email, password } = req.body;
+
+    let userexist = await userModel.findOne({ email });
+    if (!userexist) {
+        return res.status(400).send("User not found!");
+    }
+
+    let checkuser = await bcrypt.compare(password, userexist.password);
+    if (!checkuser) {
+        return res.status(400).send("Invalid password!");
+    }
+
+    const token = jwt.sign(
+        { email: userexist.email, id: userexist._id },
+        "ndobhal",
+        { expiresIn: "7d" }
+    );
+
+    res.cookie("token", token, {
+        httpOnly: true,
+        secure: false,
+        sameSite: "lax",
+        maxAge: 7 * 24 * 60 * 60 * 1000
+    });
+
+    res.redirect("/profile");
+});
+
+// ----------------- PROFILE -----------------
+app.get("/profile", isloggedin, async function (req, res) {
+    try {
+        const user = await userModel.findById(req.user.id);
+        if (!user) {
+            return res.redirect("/login");
+        }
+
+        const issues = await issueModel.find({ createdBy: user._id });
+        console.log("Rendering profile with data:", { user, issues });
+
+        res.render("profile", { user, issues });
+    } catch (err) {
+        res.status(500).send("Something went wrong!");
+    }
+});
+
+// disk storage
+const storage = multer.diskStorage({
+    destination: function (req, file, cb) {
+        cb(null, "public/uploads");
+    },
+    filename: function (req, file, cb) {
+        cb(null, Date.now() + "_" + file.originalname);
+    }
+});
+
+const upload = multer({ storage: storage });
 
 // Homepage
 app.get("/", function (req, res) {
@@ -38,122 +104,67 @@ app.get("/register", function (req, res) {
 
 // Register User
 app.post("/register", async function (req, res) {
- 
-        let { name, email, password, role } = req.body;
+    let { name, email, password, role } = req.body;
 
- //  Agar role nahi diya, default set kar do
-        if (!role || role.trim() === "") {
-            role = "citizen";
-        }
-
-        // Check if user already exists
-        let existingUser = await userModel.findOne({ email });
-        if (existingUser) {
-            return res.status(400).send("User already exists");
-        }
-
-        // Hash password
-        const salt = await bcrypt.genSalt(10);
-        const hashedPassword = await bcrypt.hash(password, salt);
-
-        // Create user
-        const createuser = await userModel.create({
-            name,
-            email,
-            password: hashedPassword,
-            role
-        });
-
-        // Successfully Register , now login
-       res.redirect("/login");
-
-
-});
-
-
-//login
-app.get("/login",function(req,res){
-    res.render("login");
-})
-
-app.post("/login",async function(req,res){
-    let{email,password}=req.body;
-    //email exist 
-    let userexist= await userModel.findOne({email});
-    //if not exist
-    if (!userexist) {
-        return res.status(400).send("User not found!");
+    if (!role || role.trim() === "") {
+        role = "citizen";
     }
-        //continue 
-        let checkuser=await bcrypt.compare(password,userexist.password);
-          if (!checkuser) {
-        return res.status(400).send("Invalid password!");
-    }
-            //generate jwt token
-            const token=jwt.sign({email:userexist.email,id:userexist._id},
-                "ndobhal",
-                {expiresIn:"7d"}
-            );
 
-          res.cookie("token", token, {
-            httpOnly: true,   //  cookie frontend JS se access nahi kar sakta
-            secure: false,    //  localhost pe false, production me true
-            maxAge: 7 * 24 * 60 * 60 * 1000 // 7 days
-        });
-        res.redirect("/profile");
+    let existingUser = await userModel.findOne({ email });
+    if (existingUser) {
+        return res.status(400).send("User already exists");
+    }
+
+    const salt = await bcrypt.genSalt(10);
+    const hashedPassword = await bcrypt.hash(password, salt);
+
+    await userModel.create({
+        name,
+        email,
+        password: hashedPassword,
+        role
     });
 
-//logout
-app.get("/logout",function(req,res){
-  res.clearCookie("token", {
+    res.redirect("/login");
+});
+
+// Login Page
+app.get("/login", function (req, res) {
+    res.render("login");
+});
+
+// Logout
+app.get("/logout", function (req, res) {
+    res.clearCookie("token", {
         httpOnly: true,
         secure: false
     });
     res.redirect("/login");
-})
-
-//profile
-app.get("/profile",isloggedin,async function(req,res){
-   try{
-    const user=await userModel.findOne({email:req.user.email});
-    if(!user){
-        return res.redirect("/login");
-    }
-    res.render("profile",{user});
-   } 
-   catch(err){
-     console.log("Profile Error:", err);
-        res.status(500).send("Something went wrong!");
-    }
 });
 
-
-
-//post
-app.get("/post",function(req,res){
+// Post issue page
+app.get("/post", isloggedin, function (req, res) {
     res.render("post");
-})
-
-app.post("/post",isloggedin,async function(req,res){
-const{title,description,location}=req.body;
-
-//create issue
-const newissue=await issueModel.create({
-title,
-description,
-location,
-createdBy:req.user.id
 });
 
+// Post issue handler
+app.post("/post", isloggedin, upload.single("image"), async function (req, res) {
+    const { title, description, location } = req.body;
 
-res.redirect("/profile");
+    if (!title || !description || !location) {
+        return res.status(400).send("please fill all the required fields");
+    }
 
-})
+    const newissue = await issueModel.create({
+        title,
+        description,
+        location,
+        image: req.file ? `uploads/${req.file.filename}` : null,
+        createdBy: req.user.id
+    });
 
-
-
-
-
+    res.redirect("/profile");
+});
 
 // Server Listen
 app.listen(3000, () => {
