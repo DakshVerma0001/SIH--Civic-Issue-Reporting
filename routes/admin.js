@@ -4,12 +4,30 @@ const issueModel = require("../database/issues");
 const isloggedin = require("../middleware/isloggedin");
 const isAdmin = require("../middleware/isAdmin");
 
-// Admin Dashboard → saare issues dikhna
+// Admin Dashboard → saare issues priority ke hisaab se dikhna
 router.get("/dashboard", isloggedin, isAdmin, async (req, res) => {
   try {
-    const issues = await issueModel.find().populate("createdBy", "name email");
+    // AI priority ke hisaab se sorting
+    const issues = await issueModel.aggregate([
+      {
+        $addFields: {
+          priorityOrder: {
+            $switch: {
+              branches: [
+                { case: { $eq: ["$aiPriority", "Critical"] }, then: 1 },
+                { case: { $eq: ["$aiPriority", "High"] }, then: 2 },
+                { case: { $eq: ["$aiPriority", "Medium"] }, then: 3 },
+                { case: { $eq: ["$aiPriority", "Low"] }, then: 4 }
+              ],
+              default: 5
+            }
+          }
+        }
+      },
+      { $sort: { priorityOrder: 1, createdAt: -1 } } // Pehle priority, fir latest
+    ]);
 
-    //  Status counts calculate karo
+    // Status counts calculate karo
     const pendingCount = await issueModel.countDocuments({ status: "Pending" });
     const inProgressCount = await issueModel.countDocuments({ status: "In Progress" });
     const resolvedCount = await issueModel.countDocuments({ status: "Resolved" });
@@ -25,7 +43,6 @@ router.get("/dashboard", isloggedin, isAdmin, async (req, res) => {
     res.status(500).send("Something went wrong!");
   }
 });
-
 
 // Approve Issue
 router.post("/issue/:id/approve", isloggedin, isAdmin, async (req, res) => {

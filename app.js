@@ -92,7 +92,7 @@ app.get("/logout", (req, res) => {
 });
 
 // Profile
-// Profile
+
 app.get("/profile", isloggedin, async (req, res) => {
     try {
         const user = await userModel.findOne({ email: req.user.email });
@@ -103,13 +103,34 @@ app.get("/profile", isloggedin, async (req, res) => {
             return res.redirect("/admin/dashboard");
         }
 
-        // Agar citizen hai toh normal profile show karo
-        res.render("profile", { user });
+        // Agar citizen hai toh apne issues priority ke hisaab se dikhaye
+        const issues = await issueModel.aggregate([
+            { $match: { createdBy: user._id } }, // sirf us user ke issues
+            {
+                $addFields: {
+                    priorityOrder: {
+                        $switch: {
+                            branches: [
+                                { case: { $eq: ["$aiPriority", "Critical"] }, then: 1 },
+                                { case: { $eq: ["$aiPriority", "High"] }, then: 2 },
+                                { case: { $eq: ["$aiPriority", "Medium"] }, then: 3 },
+                                { case: { $eq: ["$aiPriority", "Low"] }, then: 4 }
+                            ],
+                            default: 5
+                        }
+                    }
+                }
+            },
+            { $sort: { priorityOrder: 1, createdAt: -1 } } // pehle priority, fir latest
+        ]);
+
+        res.render("profile", { user, issues });
     } catch (err) {
         console.log("Profile Error:", err);
         res.status(500).send("Something went wrong!");
     }
 });
+
 
 
 // Post
