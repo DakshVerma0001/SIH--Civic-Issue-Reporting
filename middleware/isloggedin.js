@@ -9,7 +9,7 @@ function isLoggedIn(req, res, next) {
     }
 
     try {
-        // ✅ Verify token
+        // Verify token
         const decoded = jwt.verify(token, "ndobhal"); // env se bhi le sakte ho
         req.user = decoded;
         next();

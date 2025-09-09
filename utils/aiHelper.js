@@ -1,7 +1,7 @@
 // utils/aiHelper.js
 
 async function analyzeIssue(title, description) {
-  // ✅ Abhi ke liye dummy logic (later AI API call ayega)
+  // Abhi ke liye dummy logic (later AI API call ayega)
   let aiCategory = "General";
   let aiPriority = "Medium";
 

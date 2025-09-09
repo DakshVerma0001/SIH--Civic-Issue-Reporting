@@ -20,7 +20,7 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(cookieParser());
 app.set("view engine", "ejs");
-app.set("views", path.join(__dirname, "views"));   // ✅ Important
+app.set("views", path.join(__dirname, "views"));   //  Important
 
 // Import Routes
 const adminRoutes = require("./routes/admin");
@@ -69,7 +69,7 @@ app.post("/login", async (req, res) => {
     let checkuser = await bcrypt.compare(password, userexist.password);
     if (!checkuser) return res.status(400).send("Invalid password!");
 
-    // ✅ Save role in token
+    // Save role in token
     const token = jwt.sign(
         { email: userexist.email, id: userexist._id, role: userexist.role },
         "ndobhal",
@@ -98,12 +98,12 @@ app.get("/profile", isloggedin, async (req, res) => {
         const user = await userModel.findOne({ email: req.user.email });
         if (!user) return res.redirect("/login");
 
-        // ✅ Agar admin hai toh dashboard bhejo
+        // Agar admin hai toh dashboard bhejo
         if (user.role === "admin") {
             return res.redirect("/admin/dashboard");
         }
 
-        // ✅ Agar citizen hai toh normal profile show karo
+        // Agar citizen hai toh normal profile show karo
         res.render("profile", { user });
     } catch (err) {
         console.log("Profile Error:", err);
@@ -120,10 +120,10 @@ app.get("/post", (req, res) => res.render("post"));
 app.post("/post", isloggedin, async (req, res) => {
     const { title, description, location } = req.body;
 
-    // ✅ Call AI helper (pass ek object, not 2 strings)
+    // Call AI helper (pass ek object, not 2 strings)
     const { aiCategory, aiPriority } = await analyzeIssue({ title, description, location });
 
-    // ✅ Save issue with AI fields
+    // Save issue with AI fields
     await issueModel.create({
         title,
         description,
@@ -137,7 +137,7 @@ app.post("/post", isloggedin, async (req, res) => {
 });
 
 
-// ✅ Server Listen
+// Server Listen
 app.listen(5000, () => {
-    console.log("🚀 Server started on port 5000");
+    console.log("Server started on port 5000");
 });

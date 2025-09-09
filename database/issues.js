@@ -26,7 +26,7 @@ const issueSchema = new mongoose.Schema({
         ref: 'user',
         required: true
     },
-    // ✅ AI Integration fields
+    //  AI Integration fields
     aiCategory: {
         type: String,
         default: "Uncategorized"

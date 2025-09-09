@@ -9,7 +9,7 @@ router.get("/dashboard", isloggedin, isAdmin, async (req, res) => {
   try {
     const issues = await issueModel.find().populate("createdBy", "name email");
 
-    // ✅ Status counts calculate karo
+    //  Status counts calculate karo
     const pendingCount = await issueModel.countDocuments({ status: "Pending" });
     const inProgressCount = await issueModel.countDocuments({ status: "In Progress" });
     const resolvedCount = await issueModel.countDocuments({ status: "Resolved" });
