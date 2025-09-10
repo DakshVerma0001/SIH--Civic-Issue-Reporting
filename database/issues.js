@@ -1,4 +1,4 @@
-const { required } = require("joi");
+const { required } = require("mongoose");
 const mongoose=require("mongoose");
 
 const issueSchema=mongoose.Schema({
@@ -17,6 +17,9 @@ location:{
     type:String,
      required: true
 },
+ latitude: Number,
+longitude: Number,
+
 status:{
     type:String,
     enum:['Pending','In Progress','Resolved'],

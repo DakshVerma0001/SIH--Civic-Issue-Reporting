@@ -6,6 +6,13 @@ const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
 const multer = require("multer");
 const path = require("path");
+const AWS=require("aws-sdk");
+const fs = require("fs");
+const axios = require("axios");
+const sendMail = require("./utils/mailHelper");
+// Multer setup
+
+const multerS3 = require("multer-s3");
 require("dotenv").config();
 if (!process.env.JWT_SECRET) {
   console.error("FATAL: JWT_SECRET is missing. Set it in .env");
@@ -13,6 +20,30 @@ if (!process.env.JWT_SECRET) {
 }
 
 const app = express();
+
+
+
+
+// Route: reverse geocode API
+app.get("/reverse-geocode", async (req, res) => {
+  const { lat, lon } = req.query;
+  if (!lat || !lon) return res.status(400).json({ error: "lat and lon required" });
+
+  try {
+    const url = `https://nominatim.openstreetmap.org/reverse?format=jsonv2&lat=${lat}&lon=${lon}&addressdetails=1`;
+    const resp = await axios.get(url, {
+      headers: {
+        "User-Agent": "SIH-CivicIssue/1.0 (mailto:your-email@example.com)" // 👈 apna email daalna
+      },
+      timeout: 5000
+    });
+
+    res.json(resp.data);
+  } catch (err) {
+    console.error("Nominatim error:", err.message);
+    res.status(502).json({ error: "Reverse geocoding failed" });
+  }
+});
 
 // Middleware
 app.use(express.json());
@@ -37,6 +68,16 @@ function isloggedin(req, res, next) {
         return res.redirect("/login");
     }
 }
+
+
+AWS.config.update({
+  accessKeyId: process.env.AWS_ACCESS_KEY,
+  secretAccessKey: process.env.AWS_SECRET_KEY,
+  region: process.env.AWS_REGION,
+});
+
+const s3 = new AWS.S3();
+
 
 // ----------------- LOGIN -----------------
 app.post("/login", async function (req, res) {
@@ -86,12 +127,11 @@ app.get("/profile", isloggedin, async function (req, res) {
 });
 
 // disk storage
-const storage = multer.diskStorage({
-    destination: function (req, file, cb) {
-        cb(null, "public/uploads");
-    },
-    filename: function (req, file, cb) {
-        cb(null, Date.now() + "_" + file.originalname);
+const storage = multerS3({
+    s3: s3,
+    bucket: "sih-civicissue",
+    key: function (req, file, cb) {
+        cb(null, Date.now().toString() + "_" + file.originalname);
     }
 });
 
@@ -154,7 +194,12 @@ app.get("/post", isloggedin, function (req, res) {
 
 // Post issue handler
 app.post("/post", isloggedin, upload.single("image"), async function (req, res) {
-    const { title, description, location } = req.body;
+    let { title, description, location ,latitude, longitude,manualLocation } = req.body;
+
+        // Agar auto-location fail ho gayi → manual wali use karo
+    if (!location || location.trim() === "") {
+      location = manualLocation || "Unknown Location";
+    }
 
     if (!title || !description || !location) {
         return res.status(400).send("please fill all the required fields");
@@ -164,11 +209,38 @@ app.post("/post", isloggedin, upload.single("image"), async function (req, res) 
         title,
         description,
         location,
-        image: req.file ? `uploads/${req.file.filename}` : null,
+        latitude:latitude || null,
+        longitude:longitude || null,
+   image: req.file ? req.file.location : null, 
         createdBy: req.user.id
     });
+    
+    // ✅ mail bhejne ke liye user fetch karo
+    const user = await userModel.findById(req.user.id);
+
+    // Maps link
+    const mapsUrl = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(location)}`;
+    const issueUrl = `${process.env.BASE_URL}/issue/${newissue._id}`;
+
+    // ✅ Mail ka HTML
+    const html = `
+      <p>Hi ${user.name || "User"},</p>
+      <p>Your civic issue has been posted successfully ✅</p>
+      <ul>
+        <li><strong>ID:</strong> ${newissue._id}</li>
+        <li><strong>Title:</strong> ${newissue.title}</li>
+        <li><strong>Location:</strong> <a href="${mapsUrl}" target="_blank">${location}</a></li>
+      </ul>
+      <p>Track here: <a href="${issueUrl}">${issueUrl}</a></p>
+      <br/><p>Regards,<br/>SIH Civic Portal Team</p>
+    `;
+
+    // ✅ mail bhejo
+    await sendMail(user.email, `Issue Received — ID: ${newissue._id}`, html);
+
 
     res.redirect("/profile");
+    
 });
 
 //edit profile
@@ -185,7 +257,7 @@ let updatedata={name,email};
 
 //if new pic uploaded
 if(req.file){
-updatedata.profilepic="/uploads/"+req.file.filename;
+updatedata.profilepic=req.file.location;
 }
 await userModel.findByIdAndUpdate(req.user.id,updatedata,{new:true})
 res.redirect("/profile");

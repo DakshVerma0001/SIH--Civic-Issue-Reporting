@@ -23,11 +23,17 @@
             <% issues.forEach(issue => { %>
                 <div class="issue-card">
                     <% if (issue.image) { %>
-                        <img src="/<%= issue.image %>" alt="Issue Image" width="200">
+                        <img src="<%= issue.image %>" alt="Issue Image" width="200">
                     <% } %>
                     <h3><%= issue.title %></h3>
                      <p><%= issue.description %></p>
-                    <p><strong>Location:</strong> <%= issue.location %></p>
+                   
+                     <p><b>Location:</b> <%= issue.location %></p>
+    <% if (issue.latitude && issue.longitude) { %>
+      <a target="_blank" href="https://www.google.com/maps?q=<%= issue.latitude %>,<%= issue.longitude %>">
+        📍 View on Google Maps
+      </a>
+    <% } %>
                     <p><strong>Status:</strong> <%= issue.status || "Pending" %></p>
                 </div>
             <% }) %>

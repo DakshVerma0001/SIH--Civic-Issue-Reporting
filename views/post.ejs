@@ -10,9 +10,61 @@
     <form action="/post" method="post" enctype="multipart/form-data">
 <input type="text" placeholder="enter title" name="title">
 <textarea placeholder="enter your problem!" name="description" ></textarea>
-<input type="text" placeholder="enter location" name="location">
+  <input type="hidden" name="location" id="location">
+<input type="hidden" name="latitude" id="latitude">
+<input type="hidden" name="longitude" id="longitude">
+<br> <br>
+
+ <!-- Manual input -->
+  <div id="manualLocationBox">
+    <label>Enter location manually (if you don’t want auto):</label>
+    <input type="text" name="manualLocation" placeholder="Enter location">
+  </div>
+
+  <!-- Button for auto location -->
+  <button type="button" onclick="getLocation()">📍 Use My Location</button>
+
 <input type="file" name="image" class="border p-2 rounded w-full">
 <input type="submit" value="submit issue">
     </form>
+
+    <script>
+   async function getLocation() {
+    if (navigator.geolocation) {
+      navigator.geolocation.getCurrentPosition(
+        async (pos) => {
+          const lat = pos.coords.latitude;
+          const lon = pos.coords.longitude;
+          document.getElementById("latitude").value = lat;
+          document.getElementById("longitude").value = lon;
+
+          try {
+            const res = await fetch(
+              `https://nominatim.openstreetmap.org/reverse?lat=${lat}&lon=${lon}&format=json`
+            );
+            const data = await res.json();
+            if (data && data.display_name) {
+              document.getElementById("location").value = data.display_name;
+              // Also show it in manual box so user sees it
+              document.querySelector("input[name='manualLocation']").value = data.display_name;
+            }
+          } catch (err) {
+            console.error("Reverse geocoding failed", err);
+          }
+        },
+        (err) => {
+          alert("Location access denied. Please type manually.");
+        },
+        {
+             enableHighAccuracy: true,
+            timeout: 10000,
+            maximumAge: 0
+        }
+      );
+    } else {
+      alert("Geolocation not supported in this browser.");
+    }
+  }
+    </script>
 </body>
 </html>
