@@ -1,6 +1,6 @@
 const express = require('express');
 const userModel = require("./database/user");
-const issueModel = require("./database/issues");
+const issueModel = require("./database/issuesmodels");
 const cookieParser = require("cookie-parser");
 const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
@@ -77,12 +77,16 @@ app.post("/login", async (req, res) => {
     );
 
     res.cookie("token", token, {
-        httpOnly: true,
-        secure: false,
-        maxAge: 7 * 24 * 60 * 60 * 1000
-    });
+  httpOnly: true,
+  secure: false,        // localhost pe false rakho
+  sameSite: "lax",      // yeh add karo
+  maxAge: 7 * 24 * 60 * 60 * 1000
+});
 
-    res.redirect("/profile");
+//json response ke bad redirect
+
+res.redirect("/admin/dashboard");
+   
 });
 
 // Logout
@@ -156,6 +160,15 @@ app.post("/post", isloggedin, async (req, res) => {
 
     res.redirect("/profile");
 });
+//cors of frontend and backend ports
+const cors = require("cors");
+app.use(cors({
+  origin: "http://localhost:3000", // tumhara frontend URL
+  credentials: true
+}));
+//tokens for issuesvarify routes
+const issueVerifyRoutes = require("./routes/issues");
+app.use("/", issueVerifyRoutes);
 
 
 // Server Listen

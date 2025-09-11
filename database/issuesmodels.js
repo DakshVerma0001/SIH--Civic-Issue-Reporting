@@ -26,6 +26,12 @@ const issueSchema = new mongoose.Schema({
         ref: 'user',
         required: true
     },
+    //departemnt jise assign kiya gya
+    assignedDepartment: {
+    type: String, // ya future me ek aur collection bana sakte ho
+    default: null
+},
+
     //  AI Integration fields
     aiCategory: {
         type: String,
@@ -33,9 +39,10 @@ const issueSchema = new mongoose.Schema({
     },
     aiPriority: {
         type: String,
-        enum: ["Low", "Medium", "High"],
+        enum: ["Low", "Medium", "High","Critical"],
         default: "Medium"
-    }
+    },
+     verifyToken: { type: String, default: null },
 }, { timestamps: true });
 
-module.exports = mongoose.model("issue", issueSchema);
+module.exports = mongoose.model("issuesmodels", issueSchema);

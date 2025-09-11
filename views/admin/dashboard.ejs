@@ -91,6 +91,11 @@
           <form action="/admin/delete/<%= issue._id %>" method="POST" style="display:inline;">
             <button type="submit" style="background:red; color:white;">Delete</button>
           </form>
+          <!-- resolve button  -->
+           <form action="/admin/issue/<%= issue._id %>/resolve" method="POST">
+   <button type="submit" class="btn btn-success">Mark Resolved</button>
+</form>
+
         </td>
       </tr>
     <% }) %>

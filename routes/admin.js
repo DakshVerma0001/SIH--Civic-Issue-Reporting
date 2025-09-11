@@ -1,33 +1,46 @@
 const express = require("express");
 const router = express.Router();
-const issueModel = require("../database/issues");
+const issueModel = require("../database/issuesmodels");
 const isloggedin = require("../middleware/isloggedin");
 const isAdmin = require("../middleware/isAdmin");
 const sendMail = require("../utils/mailHelper"); // email bhejne ke liye
-
-// Admin Dashboard → saare issues dikhna
+const crypto = require("crypto");
+// ================= Admin Dashboard =================
 router.get("/dashboard", isloggedin, isAdmin, async (req, res) => {
   try {
     const issues = await issueModel.find().populate("createdBy", "name email");
 
-    //  Status counts calculate karo
-    const pendingCount = await issueModel.countDocuments({ status: "Pending" });
-    const inProgressCount = await issueModel.countDocuments({ status: "In Progress" });
-    const resolvedCount = await issueModel.countDocuments({ status: "Resolved" });
+    // 🔹 Status counts
+    const statusCounts = await issueModel.aggregate([
+      { $group: { _id: "$status", count: { $sum: 1 } } }
+    ]);
 
-    res.render("admin/dashboard", { 
-      issues, 
-      pendingCount, 
-      inProgressCount, 
-      resolvedCount 
-    });
+    // 🔹 Priority counts
+    const priorityCounts = await issueModel.aggregate([
+      { $group: { _id: "$aiPriority", count: { $sum: 1 } } }
+    ]);
+
+    // 🔹 Category counts
+    const categoryCounts = await issueModel.aggregate([
+      { $group: { _id: "$aiCategory", count: { $sum: 1 } } }
+    ]);
+
+   res.render("admin/dashboard", { 
+  issues, 
+  pendingCount: statusCounts.pending,
+  inProgressCount: statusCounts.inProgress,
+  resolvedCount: statusCounts.resolved,
+  priorityCounts,
+  categoryCounts
+});
+
   } catch (err) {
     console.error("Error loading admin dashboard:", err);
     res.status(500).send("Something went wrong!");
   }
 });
 
-// Approve Issue
+// ================= Approve Issue =================
 router.post("/issue/:id/approve", isloggedin, isAdmin, async (req, res) => {
   try {
     const issue = await issueModel.findByIdAndUpdate(
@@ -36,7 +49,7 @@ router.post("/issue/:id/approve", isloggedin, isAdmin, async (req, res) => {
       { new: true }
     ).populate("createdBy", "name email");
 
-    if (issue && issue.createdBy) {
+    if (issue?.createdBy) {
       await sendMail(
         issue.createdBy.email,
         "Your Issue has been Approved ✅",
@@ -51,7 +64,7 @@ router.post("/issue/:id/approve", isloggedin, isAdmin, async (req, res) => {
   }
 });
 
-// Reject Issue
+// ================ Reject Issue =================
 router.post("/issue/:id/reject", isloggedin, isAdmin, async (req, res) => {
   try {
     const issue = await issueModel.findByIdAndUpdate(
@@ -60,7 +73,7 @@ router.post("/issue/:id/reject", isloggedin, isAdmin, async (req, res) => {
       { new: true }
     ).populate("createdBy", "name email");
 
-    if (issue && issue.createdBy) {
+    if (issue?.createdBy) {
       await sendMail(
         issue.createdBy.email,
         "Your Issue has been Rejected ❌",
@@ -72,6 +85,43 @@ router.post("/issue/:id/reject", isloggedin, isAdmin, async (req, res) => {
   } catch (err) {
     console.error("Error rejecting issue:", err);
     res.status(500).send("Failed to reject issue!");
+  }
+});
+// ================= Mark as Resolved =================
+router.post("/issue/:id/resolve", isloggedin, isAdmin, async (req, res) => {
+  try {
+    const issue = await issueModel.findById(req.params.id).populate("createdBy", "name email");
+    if (!issue) return res.status(404).send("Issue not found");
+
+    // status ko Resolved set karo
+    issue.status = "Resolved";
+
+    // unique token banao
+    issue.verifyToken = crypto.randomBytes(20).toString("hex");
+    await issue.save();
+
+    const base = process.env.BASE_URL || "http://localhost:3000";
+    const acceptUrl = `${base}/issue/${issue._id}/accept/${issue.verifyToken}`;
+    const declineUrl = `${base}/issue/${issue._id}/decline/${issue.verifyToken}`;
+
+    await sendMail(
+      issue.createdBy.email,
+      "Please verify if your issue is resolved ✅",
+      `Hello ${issue.createdBy.name},
+
+Your issue "${issue.title}" has been marked as Resolved.
+
+Please click:
+✅ Accept: ${acceptUrl}
+❌ Decline: ${declineUrl}
+
+Thanks!`
+    );
+
+    res.redirect("/admin/dashboard");
+  } catch (err) {
+    console.error("Error resolving issue:", err);
+    res.status(500).send("Failed to resolve issue!");
   }
 });
 
