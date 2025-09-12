@@ -310,7 +310,8 @@ app.post("/post", isloggedin, upload.single("image"), async function (req, res) 
       <p>Hi ${user.name || "User"},</p>
       <p>Your civic issue has been reported successfully ✅</p>
       <ul>
-        <li><strong>User ID:</strong> ${newissue.customId}</li>
+        <li><strong>User ID:</strong> ${user.customId}</li>
+         <li><strong>Issue ID:</strong> ${newissue.customId}</li>
         <li><strong>Title:</strong> ${newissue.title}</li>
         <li><strong>Location:</strong> <a href="${mapsUrl}" target="_blank">${location}</a></li>
       </ul>
