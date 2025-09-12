@@ -19,6 +19,14 @@ if (!process.env.JWT_SECRET) {
   process.exit(1);
 }
 
+// temporary in-memory store for OTPs (dev only)
+const emailOtpStore = {}; // { "<email>": { otp: "123456", expiresAt: Date } }
+const OTP_TTL_MS = 5 * 60 * 1000; // 5 minutes
+
+const verifiedEmails = {}; // { "<email>": timestampUntilValid }
+const VERIFIED_TTL_MS = 10 * 60 * 1000; // 10 minutes window to complete registration after verification
+
+
 const app = express();
 
 
@@ -141,6 +149,64 @@ app.get("/", function (req, res) {
     res.render("index");
 });
 
+// Send OTP to email
+app.post("/send-email-otp", async (req, res) => {
+  try {
+    const { email } = req.body;
+    if (!email) return res.status(400).json({ success: false, msg: "Email required" });
+
+    // generate 6-digit OTP
+    const otp = Math.floor(100000 + Math.random() * 900000).toString();
+
+    // store OTP with expiry
+    emailOtpStore[email] = {
+      otp,
+      expiresAt: Date.now() + OTP_TTL_MS
+    };
+
+    // send OTP by email using your sendMail helper
+    const html = `<p>Your verification OTP is <strong>${otp}</strong>. It will expire in 5 minutes.</p>`;
+    await sendMail(email, "Your verification OTP", html);
+
+    console.log("Email OTP sent:", email, otp); // useful for dev
+    return res.json({ success: true, msg: "OTP sent" });
+  } catch (err) {
+    console.error("send-email-otp error:", err);
+    return res.status(500).json({ success: false, msg: "Failed to send OTP" });
+  }
+});
+
+// Verify OTP
+app.post("/verify-email-otp", (req, res) => {
+  try {
+    const { email, otp } = req.body;
+    if (!email || !otp) return res.status(400).json({ success: false, msg: "Email and OTP required" });
+
+    const record = emailOtpStore[email];
+    if (!record) return res.status(400).json({ success: false, msg: "No OTP requested for this email" });
+
+    if (Date.now() > record.expiresAt) {
+      delete emailOtpStore[email];
+      return res.status(400).json({ success: false, msg: "OTP expired" });
+    }
+
+    if (record.otp !== otp.toString()) {
+      return res.status(400).json({ success: false, msg: "Invalid OTP" });
+    }
+
+    //  ✅ Mark as verified
+    verifiedEmails[email] = Date.now() + VERIFIED_TTL_MS;
+
+    delete emailOtpStore[email];
+
+    return res.json({ success: true, msg: "Email verified" });
+  } catch (err) {
+    console.error("verify-email-otp error:", err);
+    return res.status(500).json({ success: false, msg: "Verification failed" });
+  }
+});
+
+
 // Register Page
 app.get("/register", function (req, res) {
     res.render("register");
@@ -149,6 +215,14 @@ app.get("/register", function (req, res) {
 // Register User
 app.post("/register", async function (req, res) {
     let { name, email, password, confirmpassword,role ,phone,latitude,longitude,address} = req.body;
+
+    // before creating user
+if (!verifiedEmails[email] || Date.now() > verifiedEmails[email]) {
+  return res.status(400).send("Please verify your email before registering");
+}
+
+// optionally delete it after use:
+delete verifiedEmails[email];
 
     if (password !== confirmpassword) {
         return res.status(400).send("Passwords do not match!");
@@ -234,9 +308,9 @@ app.post("/post", isloggedin, upload.single("image"), async function (req, res) 
     // ✅ Mail ka HTML
     const html = `
       <p>Hi ${user.name || "User"},</p>
-      <p>Your civic issue has been posted successfully ✅</p>
+      <p>Your civic issue has been reported successfully ✅</p>
       <ul>
-        <li><strong>ID:</strong> ${newissue._id}</li>
+        <li><strong>User ID:</strong> ${newissue.customId}</li>
         <li><strong>Title:</strong> ${newissue.title}</li>
         <li><strong>Location:</strong> <a href="${mapsUrl}" target="_blank">${location}</a></li>
       </ul>

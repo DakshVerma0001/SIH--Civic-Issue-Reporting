@@ -11,7 +11,22 @@
 
   <form action="/register" method="post" class="space-y-4">
     <input type="text" placeholder="Enter name" name="name" required class="border p-2 rounded w-full" />
-    <input type="email" placeholder="Enter email" name="email" required class="border p-2 rounded w-full" />
+    <!-- Email + verify UI -->
+<div>
+  <input id="emailInput" type="email" name="email" placeholder="Enter email" required class="border p-2 rounded w-full"/>
+  <div id="emailActions" class="mt-2">
+    <button id="sendOtpBtn" type="button" class="bg-blue-500 text-white px-3 py-1 rounded">Verify email</button>
+  </div>
+  <div id="otpBox" style="display:none; margin-top:8px;">
+    <input id="otpInput" type="text" placeholder="Enter OTP" class="border p-2 rounded" />
+    <button id="verifyOtpBtn" type="button" class="bg-green-500 text-white px-3 py-1 rounded">Verify OTP</button>
+    <span id="otpStatus" style="margin-left:8px;"></span>
+  </div>
+
+  <!-- hidden flag to send to server on register submit -->
+  <input type="hidden" name="email_verified" id="email_verified" value="false" />
+</div>
+
     <input type="password" placeholder="Enter password" name="password" required class="border p-2 rounded w-full" />
     <input type="password" placeholder="Confirm password" name="confirmpassword" required class="border p-2 rounded w-full" />
     <input type="tel" placeholder="Enter phone number" name="phone" required class="border p-2 rounded w-full" />
@@ -33,6 +48,71 @@
   </form>
 
  <script>
+
+  document.getElementById("sendOtpBtn").addEventListener("click", async () => {
+    const email = document.getElementById("emailInput").value.trim();
+    if (!email) { alert("Enter email first"); return; }
+
+    try {
+      const res = await fetch("/send-email-otp", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email })
+      });
+      const data = await res.json();
+      if (data.success) {
+        document.getElementById("otpBox").style.display = "block";
+        document.getElementById("otpStatus").textContent = "OTP sent. Check your email.";
+      } else {
+        document.getElementById("otpStatus").textContent = data.msg || "Failed to send OTP";
+      }
+    } catch (err) {
+      console.error(err);
+      document.getElementById("otpStatus").textContent = "Error sending OTP";
+    }
+  });
+
+  document.getElementById("verifyOtpBtn").addEventListener("click", async () => {
+    const email = document.getElementById("emailInput").value.trim();
+    const otp = document.getElementById("otpInput").value.trim();
+    if (!otp) { alert("Enter OTP"); return; }
+
+    try {
+      const res = await fetch("/verify-email-otp", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email, otp })
+      });
+      const data = await res.json();
+      if (data.success) {
+        document.getElementById("email_verified").value = "true";
+        document.getElementById("otpStatus").textContent = "Verified ✅";
+        // optionally disable email field and hide OTP UI
+        document.getElementById("emailInput").readOnly = true;
+        document.getElementById("sendOtpBtn").disabled = true;
+        document.getElementById("otpBox").style.display = "none";
+      } else {
+        document.getElementById("otpStatus").textContent = data.msg || "Invalid OTP";
+      }
+    } catch (err) {
+      console.error(err);
+      document.getElementById("otpStatus").textContent = "Verification error";
+    }
+  });
+
+  // optional: prevent register submission unless verified
+  const form = document.querySelector('form[action="/register"]');
+  if (form) {
+    form.addEventListener("submit", (e) => {
+      const verified = document.getElementById("email_verified").value === "true";
+      if (!verified) {
+        e.preventDefault();
+        alert("Please verify your email before registering");
+      }
+    });
+  }
+
+
   async function getLocation() {
     if (navigator.geolocation) {
       navigator.geolocation.getCurrentPosition(
