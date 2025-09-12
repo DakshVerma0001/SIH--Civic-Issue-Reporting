@@ -10,9 +10,10 @@
 
   <img src="<%= user.profilepic ? user.profilepic : '/images/uploads/default.jpg' %>" 
        alt="Profile pic" width="120" height="120">
-
+<p>User ID: <%= user.customId %></p>
   <p>Name: <%= user.name %></p>
   <p>Email: <%= user.email %></p>
+ <p>Address: <%= user && user.address ? user.address : "Not Provided" %></p>
   <p>Role: <%= user.role %></p>
 
   <a href="/profile/edit">Edit Profile</a>
@@ -35,6 +36,14 @@
       </a>
     <% } %>
                     <p><strong>Status:</strong> <%= issue.status || "Pending" %></p>
+               <a href="/issue/edit/<%= issue._id%>">edit</a>
+
+                <form action="/issue/delete/<%= issue._id %>" method="POST" style="display:inline;">
+          <button type="submit" 
+                  style="padding:5px 10px; background:red; color:white; border:none; border-radius:5px; cursor:pointer;">
+            🗑️ Delete
+          </button>
+        </form>
                 </div>
             <% }) %>
         <% } else { %>

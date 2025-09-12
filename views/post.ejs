@@ -18,7 +18,7 @@
  <!-- Manual input -->
   <div id="manualLocationBox">
     <label>Enter location manually (if you don’t want auto):</label>
-    <input type="text" name="manualLocation" placeholder="Enter location">
+    <input type="text"  id="manualLocation" name="manualLocation" placeholder="Enter location">
   </div>
 
   <!-- Button for auto location -->
@@ -28,43 +28,46 @@
 <input type="submit" value="submit issue">
     </form>
 
-    <script>
-   async function getLocation() {
-    if (navigator.geolocation) {
-      navigator.geolocation.getCurrentPosition(
-        async (pos) => {
-          const lat = pos.coords.latitude;
-          const lon = pos.coords.longitude;
-          document.getElementById("latitude").value = lat;
-          document.getElementById("longitude").value = lon;
+ <script>
+    async function getLocation() {
+      if (navigator.geolocation) {
+        navigator.geolocation.getCurrentPosition(
+          async (pos) => {
+            const lat = pos.coords.latitude;
+            const lon = pos.coords.longitude;
 
-          try {
-            const res = await fetch(
-              `https://nominatim.openstreetmap.org/reverse?lat=${lat}&lon=${lon}&format=json`
-            );
-            const data = await res.json();
-            if (data && data.display_name) {
-              document.getElementById("location").value = data.display_name;
-              // Also show it in manual box so user sees it
-              document.querySelector("input[name='manualLocation']").value = data.display_name;
+            // set hidden values
+            document.getElementById("latitude").value = lat;
+            document.getElementById("longitude").value = lon;
+
+            try {
+              const res = await fetch(`/reverse-geocode?lat=${lat}&lon=${lon}`);
+              const data = await res.json();
+
+              if (data && data.display_name) {
+                // set in hidden location
+                document.getElementById("location").value = data.display_name;
+                // also update manual input box so user can see/edit
+              document.getElementById("manualLocation").value = data.display_name;
+              } else {
+                document.getElementById("location").value = `${lat}, ${lon}`;
+                document.getElementById("manualLocation").value = `${lat}, ${lon}`;
+              }
+            } catch (err) {
+              console.error("Reverse geocoding failed", err);
+              document.getElementById("location").value = `${lat}, ${lon}`;
+              document.getElementById("manualLocation").value = `${lat}, ${lon}`;
             }
-          } catch (err) {
-            console.error("Reverse geocoding failed", err);
-          }
-        },
-        (err) => {
-          alert("Location access denied. Please type manually.");
-        },
-        {
-             enableHighAccuracy: true,
-            timeout: 10000,
-            maximumAge: 0
-        }
-      );
-    } else {
-      alert("Geolocation not supported in this browser.");
+          },
+          (err) => {
+            alert("Location access denied. Please type manually.");
+          },
+          { enableHighAccuracy: true, timeout: 10000, maximumAge: 0 }
+        );
+      } else {
+        alert("Geolocation not supported in this browser.");
+      }
     }
-  }
-    </script>
+  </script>
 </body>
 </html>

@@ -22,28 +22,28 @@ if (!process.env.JWT_SECRET) {
 const app = express();
 
 
-
-
-// Route: reverse geocode API
+// ---------- Reverse Geocode API ----------
 app.get("/reverse-geocode", async (req, res) => {
-  const { lat, lon } = req.query;
-  if (!lat || !lon) return res.status(400).json({ error: "lat and lon required" });
-
   try {
-    const url = `https://nominatim.openstreetmap.org/reverse?format=jsonv2&lat=${lat}&lon=${lon}&addressdetails=1`;
-    const resp = await axios.get(url, {
-      headers: {
-        "User-Agent": "SIH-CivicIssue/1.0 (mailto:your-email@example.com)" // 👈 apna email daalna
-      },
-      timeout: 5000
-    });
+    const { lat, lon } = req.query;
+    const apiKey = process.env.OPENCAGE_API_KEY;
 
-    res.json(resp.data);
+    const response = await fetch(
+      `https://api.opencagedata.com/geocode/v1/json?q=${lat}+${lon}&key=${apiKey}`
+    );
+    const data = await response.json();
+
+    if (data.results && data.results.length > 0) {
+      return res.json({ display_name: data.results[0].formatted });
+    } else {
+      return res.json({ display_name: `${lat}, ${lon}` });
+    }
   } catch (err) {
-    console.error("Nominatim error:", err.message);
-    res.status(502).json({ error: "Reverse geocoding failed" });
+    console.error("Reverse geocode failed", err);
+    res.json({ display_name: "Unknown Location" });
   }
 });
+
 
 // Middleware
 app.use(express.json());
@@ -112,13 +112,12 @@ app.post("/login", async function (req, res) {
 // ----------------- PROFILE -----------------
 app.get("/profile", isloggedin, async function (req, res) {
     try {
-        const user = await userModel.findById(req.user.id);
+        const user = await userModel.findOne({_id:req.user.id});
         if (!user) {
             return res.redirect("/login");
         }
 
         const issues = await issueModel.find({ createdBy: user._id });
-        console.log("Rendering profile with data:", { user, issues });
 
         res.render("profile", { user, issues });
     } catch (err) {
@@ -149,11 +148,17 @@ app.get("/register", function (req, res) {
 
 // Register User
 app.post("/register", async function (req, res) {
-    let { name, email, password, role } = req.body;
+    let { name, email, password, confirmpassword,role ,phone,latitude,longitude,address} = req.body;
+
+    if (password !== confirmpassword) {
+        return res.status(400).send("Passwords do not match!");
+    }
 
     if (!role || role.trim() === "") {
         role = "citizen";
     }
+
+
 
     let existingUser = await userModel.findOne({ email });
     if (existingUser) {
@@ -167,7 +172,11 @@ app.post("/register", async function (req, res) {
         name,
         email,
         password: hashedPassword,
-        role
+        role,
+         phone,
+        address,
+        latitude,
+        longitude
     });
 
     res.redirect("/login");
@@ -243,6 +252,19 @@ app.post("/post", isloggedin, upload.single("image"), async function (req, res) 
     
 });
 
+// Single issue page
+app.get("/issue/:id", isloggedin, async (req, res) => {
+  try {
+    const issue = await issueModel.findById(req.params.id).populate("createdBy", "name email");
+    if (!issue) return res.status(404).send("Issue not found");
+
+    res.render("issue", { issue });
+  } catch (err) {
+    console.error(err);
+    res.status(500).send("Error loading issue");
+  }
+});
+
 //edit profile
 app.get("/profile/edit",isloggedin,async function(req,res){
     const user=await userModel.findById(req.user.id);
@@ -272,6 +294,42 @@ res.redirect("/profile");
     }
 })
 
+//show egit issue form
+app.get("/issue/edit/:id", isloggedin, async (req, res) => {
+  try {
+    const issue = await issueModel.findById(req.params.id);
+
+    if (!issue) {
+      return res.status(404).send("Issue not found");
+    }
+
+    // safe check
+    if (!issue.createdBy || issue.createdBy.toString() !== req.user.id) {
+      return res.status(403).send("Not authorized");
+    }
+
+    res.render("editIssue", { issue });
+  } catch (err) {
+    console.error("Edit issue error:", err);
+    res.status(500).send("Server error");
+  }
+});
+
+// Handle edit submit
+app.post("/issue/edit/:id", isloggedin, async (req, res) => {
+  const { title, description, manualLocation } = req.body;
+  await issueModel.findOneAndUpdate(
+    { _id: req.params.id, createdBy: req.user.id },
+    { title, description, location: manualLocation }
+  );
+  res.redirect("/profile");
+});
+
+// Delete issue
+app.post("/issue/delete/:id", isloggedin, async (req, res) => {
+  await issueModel.findOneAndDelete({ _id: req.params.id, createdBy: req.user.id });
+  res.redirect("/profile");
+});
 
 
 // Server Listen
