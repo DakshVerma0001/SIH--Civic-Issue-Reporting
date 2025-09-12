@@ -1,4 +1,4 @@
-const { required } = require("joi");
+const { required } = require("mongoose");
 const mongoose=require("mongoose");
 
 const issueSchema=mongoose.Schema({
@@ -17,12 +17,20 @@ location:{
     type:String,
      required: true
 },
+ latitude: Number,
+longitude: Number,
+
 status:{
     type:String,
     enum:['Pending','In Progress','Resolved'],
     default:'Pending'
 },
 
+customId: { type: String, unique: true ,
+    default: function() {
+    return "CFI" + Math.floor(100000 + Math.random() * 900000);
+  }
+},
 createdBy:{
  type:mongoose.Schema.Types.ObjectId,
  ref:'user',
@@ -30,4 +38,11 @@ createdBy:{
 }
 },{ timestamps: true });
 
+// pre-save hook for CFU id
+issueSchema.pre("save", function (next) {
+  if (!this.customId) {
+    this.customId = "CFU" + Math.floor(100000 + Math.random() * 900000); // CFU + 6 digit random
+  }
+  next();
+});
 module.exports=mongoose.model("issue",issueSchema);
