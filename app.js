@@ -270,6 +270,8 @@ app.get("/logout", function (req, res) {
     res.redirect("/login");
 });
 
+
+
 // Post issue page
 app.get("/post", isloggedin, function (req, res) {
     res.render("post");
@@ -405,6 +407,10 @@ app.post("/issue/delete/:id", isloggedin, async (req, res) => {
   await issueModel.findOneAndDelete({ _id: req.params.id, createdBy: req.user.id });
   res.redirect("/profile");
 });
+
+// Admin routes
+const adminRoutes = require("./routes/adminRoutes");
+app.use("/admin", adminRoutes);
 
 
 // Server Listen
