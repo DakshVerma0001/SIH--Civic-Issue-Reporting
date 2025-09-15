@@ -412,7 +412,6 @@ app.post("/issue/delete/:id", isloggedin, async (req, res) => {
 const adminRoutes = require("./routes/adminRoutes");
 app.use("/admin", adminRoutes);
 
-
 // Server Listen
 app.listen(3000, () => {
     console.log("Server running on port 3000");
