@@ -1,4 +1,4 @@
-const Issue = require("../database/issues");
+import Issue from "../database/issues";
 
 exports.getDashboard = async (req, res) => {
   const issues = await Issue.find().limit(5).lean();

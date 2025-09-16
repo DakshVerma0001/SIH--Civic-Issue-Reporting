@@ -1,10 +1,14 @@
 <h2>Admin Dashboard</h2>
+
 <div style="display:flex; gap:20px; flex-wrap:wrap;">
-  <% issues.forEach(i => { %>
-    <div style="width:250px; border:1px solid #ccc; padding:15px;">
-      <h4><%= i.title %></h4>
-      <p><%= i.description %></p>
-      <a href="/admin/issues/<%= i._id %>">View</a>
-    </div>
-  <% }) %>
+  <% if (typeof issues !== "undefined" && issues.length) { %>
+    <% issues.forEach(i => { %>
+      <div style="width:250px; border:1px solid #ccc; padding:15px;">
+        <h4><%= i.title %></h4>
+        <p><%= i.description %></p>
+      </div>
+    <% }) %>
+  <% } else { %>
+    <p>No issues found.</p>
+  <% } %>
 </div>

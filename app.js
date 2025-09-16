@@ -1,19 +1,21 @@
-const express = require('express');
-const userModel = require("./database/user");
-const issueModel = require("./database/issues");
-const cookieParser = require("cookie-parser");
-const bcrypt = require("bcrypt");
-const jwt = require("jsonwebtoken");
-const multer = require("multer");
-const path = require("path");
-const AWS=require("aws-sdk");
-const fs = require("fs");
-const axios = require("axios");
-const sendMail = require("./utils/mailHelper");
-// Multer setup
+import express from 'express';
+import userModel from "./database/user.js";
+import issueModel from "./database/issues.js";
+import cookieParser from "cookie-parser";
+import bcrypt from "bcrypt";
+import jwt from "jsonwebtoken";
+import multer from "multer";
+import path from "path";
+import AWS from "aws-sdk";
+import fs from "fs";
+import axios from "axios";
+import sendMail from "./utils/mailHelper.js";
+import multerS3 from "multer-s3";
+import dotenv from "dotenv";
+import adminRoutes from "./routes/adminRoutes.js"; // <-- converted require to import
 
-const multerS3 = require("multer-s3");
-require("dotenv").config();
+dotenv.config();
+
 if (!process.env.JWT_SECRET) {
   console.error("FATAL: JWT_SECRET is missing. Set it in .env");
   process.exit(1);
@@ -22,13 +24,10 @@ if (!process.env.JWT_SECRET) {
 // temporary in-memory store for OTPs (dev only)
 const emailOtpStore = {}; // { "<email>": { otp: "123456", expiresAt: Date } }
 const OTP_TTL_MS = 5 * 60 * 1000; // 5 minutes
-
 const verifiedEmails = {}; // { "<email>": timestampUntilValid }
-const VERIFIED_TTL_MS = 10 * 60 * 1000; // 10 minutes window to complete registration after verification
-
+const VERIFIED_TTL_MS = 10 * 60 * 1000; // 10 minutes window
 
 const app = express();
-
 
 // ---------- Reverse Geocode API ----------
 app.get("/reverse-geocode", async (req, res) => {
@@ -52,7 +51,6 @@ app.get("/reverse-geocode", async (req, res) => {
   }
 });
 
-
 // Middleware
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
@@ -63,11 +61,9 @@ app.use(express.static("public"));
 // ----------------- MIDDLEWARE -----------------
 function isloggedin(req, res, next) {
     const token = req.cookies.token;
-
     if (!token) {
         return res.redirect("/login");
     }
-
     try {
         const data = jwt.verify(token, process.env.JWT_SECRET);
         req.user = data;
@@ -77,7 +73,7 @@ function isloggedin(req, res, next) {
     }
 }
 
-
+// AWS setup
 AWS.config.update({
   accessKeyId: process.env.AWS_ACCESS_KEY,
   secretAccessKey: process.env.AWS_SECRET_KEY,
@@ -86,47 +82,66 @@ AWS.config.update({
 
 const s3 = new AWS.S3();
 
-
 // ----------------- LOGIN -----------------
 app.post("/login", async function (req, res) {
-    let { email, password } = req.body;
+  try {
+    const { email, password } = req.body;
 
-    let userexist = await userModel.findOne({ email });
-    if (!userexist) {
-        return res.status(400).send("User not found!");
-    }
-
-    let checkuser = await bcrypt.compare(password, userexist.password);
-    if (!checkuser) {
-        return res.status(400).send("Invalid password!");
-    }
-
-    const token = jwt.sign(
-        { email: userexist.email, id: userexist._id },
+    // --- ✅ First: check if admin ---
+    if (
+      email === process.env.ADMIN_EMAIL &&
+      password === process.env.ADMIN_PASSWORD
+    ) {
+      const token = jwt.sign(
+        { email, isAdmin: true },
         process.env.JWT_SECRET,
         { expiresIn: "7d" }
-    );
+      );
 
-    res.cookie("token", token, {
+      res.cookie("token", token, {
         httpOnly: true,
         secure: false,
         sameSite: "lax",
-        maxAge: 7 * 24 * 60 * 60 * 1000
+        maxAge: 7 * 24 * 60 * 60 * 1000,
+      });
+
+      return res.redirect("/admin/dashboard");
+    }
+
+    // --- 👤 Normal user flow ---
+    const userexist = await userModel.findOne({ email });
+    if (!userexist) return res.status(400).send("User not found!");
+
+    const checkuser = await bcrypt.compare(password, userexist.password);
+    if (!checkuser) return res.status(400).send("Invalid password!");
+
+    const token = jwt.sign(
+      { email: userexist.email, id: userexist._id },
+      process.env.JWT_SECRET,
+      { expiresIn: "7d" }
+    );
+
+    res.cookie("token", token, {
+      httpOnly: true,
+      secure: false,
+      sameSite: "lax",
+      maxAge: 7 * 24 * 60 * 60 * 1000,
     });
 
-    res.redirect("/profile");
+    return res.redirect("/profile");
+  } catch (err) {
+    console.error("Login error:", err);
+    res.status(500).send("Server error");
+  }
 });
 
 // ----------------- PROFILE -----------------
 app.get("/profile", isloggedin, async function (req, res) {
     try {
         const user = await userModel.findOne({_id:req.user.id});
-        if (!user) {
-            return res.redirect("/login");
-        }
+        if (!user) return res.redirect("/login");
 
         const issues = await issueModel.find({ createdBy: user._id });
-
         res.render("profile", { user, issues });
     } catch (err) {
         res.status(500).send("Something went wrong!");
@@ -142,12 +157,10 @@ const storage = multerS3({
     }
 });
 
-const upload = multer({ storage: storage });
+const upload = multer({ storage });
 
 // Homepage
-app.get("/", function (req, res) {
-    res.render("index");
-});
+app.get("/", (req, res) => res.render("index"));
 
 // Send OTP to email
 app.post("/send-email-otp", async (req, res) => {
@@ -155,20 +168,13 @@ app.post("/send-email-otp", async (req, res) => {
     const { email } = req.body;
     if (!email) return res.status(400).json({ success: false, msg: "Email required" });
 
-    // generate 6-digit OTP
     const otp = Math.floor(100000 + Math.random() * 900000).toString();
+    emailOtpStore[email] = { otp, expiresAt: Date.now() + OTP_TTL_MS };
 
-    // store OTP with expiry
-    emailOtpStore[email] = {
-      otp,
-      expiresAt: Date.now() + OTP_TTL_MS
-    };
-
-    // send OTP by email using your sendMail helper
     const html = `<p>Your verification OTP is <strong>${otp}</strong>. It will expire in 5 minutes.</p>`;
     await sendMail(email, "Your verification OTP", html);
 
-    console.log("Email OTP sent:", email, otp); // useful for dev
+    console.log("Email OTP sent:", email, otp);
     return res.json({ success: true, msg: "OTP sent" });
   } catch (err) {
     console.error("send-email-otp error:", err);
@@ -184,19 +190,10 @@ app.post("/verify-email-otp", (req, res) => {
 
     const record = emailOtpStore[email];
     if (!record) return res.status(400).json({ success: false, msg: "No OTP requested for this email" });
+    if (Date.now() > record.expiresAt) { delete emailOtpStore[email]; return res.status(400).json({ success: false, msg: "OTP expired" }); }
+    if (record.otp !== otp.toString()) return res.status(400).json({ success: false, msg: "Invalid OTP" });
 
-    if (Date.now() > record.expiresAt) {
-      delete emailOtpStore[email];
-      return res.status(400).json({ success: false, msg: "OTP expired" });
-    }
-
-    if (record.otp !== otp.toString()) {
-      return res.status(400).json({ success: false, msg: "Invalid OTP" });
-    }
-
-    //  ✅ Mark as verified
     verifiedEmails[email] = Date.now() + VERIFIED_TTL_MS;
-
     delete emailOtpStore[email];
 
     return res.json({ success: true, msg: "Email verified" });
@@ -206,108 +203,57 @@ app.post("/verify-email-otp", (req, res) => {
   }
 });
 
-
-// Register Page
-app.get("/register", function (req, res) {
-    res.render("register");
+// Register & login pages
+app.get("/register", (req, res) => res.render("register"));
+app.get("/login", (req, res) => res.render("login"));
+app.get("/logout", (req, res) => {
+    res.clearCookie("token", { httpOnly: true, secure: false });
+    res.redirect("/login");
 });
 
 // Register User
-app.post("/register", async function (req, res) {
-    let { name, email, password, confirmpassword,role ,phone,latitude,longitude,address} = req.body;
+app.post("/register", async (req, res) => {
+    let { name, email, password, confirmpassword, role, phone, latitude, longitude, address } = req.body;
 
-    // before creating user
-if (!verifiedEmails[email] || Date.now() > verifiedEmails[email]) {
-  return res.status(400).send("Please verify your email before registering");
-}
+    if (!verifiedEmails[email] || Date.now() > verifiedEmails[email]) return res.status(400).send("Please verify your email before registering");
+    delete verifiedEmails[email];
 
-// optionally delete it after use:
-delete verifiedEmails[email];
-
-    if (password !== confirmpassword) {
-        return res.status(400).send("Passwords do not match!");
-    }
-
-    if (!role || role.trim() === "") {
-        role = "citizen";
-    }
-
-
+    if (password !== confirmpassword) return res.status(400).send("Passwords do not match!");
+    if (!role || role.trim() === "") role = "citizen";
 
     let existingUser = await userModel.findOne({ email });
-    if (existingUser) {
-        return res.status(400).send("User already exists");
-    }
+    if (existingUser) return res.status(400).send("User already exists");
 
     const salt = await bcrypt.genSalt(10);
     const hashedPassword = await bcrypt.hash(password, salt);
 
-    await userModel.create({
-        name,
-        email,
-        password: hashedPassword,
-        role,
-         phone,
-        address,
-        latitude,
-        longitude
-    });
+    await userModel.create({ name, email, password: hashedPassword, role, phone, address, latitude, longitude });
 
     res.redirect("/login");
 });
-
-// Login Page
-app.get("/login", function (req, res) {
-    res.render("login");
-});
-
-// Logout
-app.get("/logout", function (req, res) {
-    res.clearCookie("token", {
-        httpOnly: true,
-        secure: false
-    });
-    res.redirect("/login");
-});
-
-
 
 // Post issue page
-app.get("/post", isloggedin, function (req, res) {
-    res.render("post");
-});
+app.get("/post", isloggedin, (req, res) => res.render("post"));
 
 // Post issue handler
-app.post("/post", isloggedin, upload.single("image"), async function (req, res) {
-    let { title, description, location ,latitude, longitude,manualLocation } = req.body;
-
-        // Agar auto-location fail ho gayi → manual wali use karo
-    if (!location || location.trim() === "") {
-      location = manualLocation || "Unknown Location";
-    }
-
-    if (!title || !description || !location) {
-        return res.status(400).send("please fill all the required fields");
-    }
+app.post("/post", isloggedin, upload.single("image"), async (req, res) => {
+    let { title, description, location, latitude, longitude, manualLocation } = req.body;
+    if (!location || location.trim() === "") location = manualLocation || "Unknown Location";
+    if (!title || !description || !location) return res.status(400).send("please fill all the required fields");
 
     const newissue = await issueModel.create({
         title,
         description,
         location,
-        latitude:latitude || null,
-        longitude:longitude || null,
-   image: req.file ? req.file.location : null, 
+        latitude: latitude || null,
+        longitude: longitude || null,
+        image: req.file ? req.file.location : null, 
         createdBy: req.user.id
     });
-    
-    // ✅ mail bhejne ke liye user fetch karo
-    const user = await userModel.findById(req.user.id);
 
-    // Maps link
+    const user = await userModel.findById(req.user.id);
     const mapsUrl = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(location)}`;
     const issueUrl = `${process.env.BASE_URL}/issue/${newissue._id}`;
-
-    // ✅ Mail ka HTML
     const html = `
       <p>Hi ${user.name || "User"},</p>
       <p>Your civic issue has been reported successfully ✅</p>
@@ -320,96 +266,72 @@ app.post("/post", isloggedin, upload.single("image"), async function (req, res) 
       <p>Track here: <a href="${issueUrl}">${issueUrl}</a></p>
       <br/><p>Regards,<br/>SIH Civic Portal Team</p>
     `;
-
-    // ✅ mail bhejo
     await sendMail(user.email, `Issue Received — ID: ${newissue._id}`, html);
 
-
     res.redirect("/profile");
-    
 });
 
 // Single issue page
 app.get("/issue/:id", isloggedin, async (req, res) => {
-  try {
-    const issue = await issueModel.findById(req.params.id).populate("createdBy", "name email");
-    if (!issue) return res.status(404).send("Issue not found");
-
-    res.render("issue", { issue });
-  } catch (err) {
-    console.error(err);
-    res.status(500).send("Error loading issue");
-  }
-});
-
-//edit profile
-app.get("/profile/edit",isloggedin,async function(req,res){
-    const user=await userModel.findById(req.user.id);
-    res.render("editprofile",{user});
-});
-
-//handle edit profile form
-app.post("/profile/edit",isloggedin,upload.single("profilepic"),async function(req,res){
-    try{
-        const {name,email}=req.body;
-let updatedata={name,email};
-
-//if new pic uploaded
-if(req.file){
-updatedata.profilepic=req.file.location;
-}
-await userModel.findByIdAndUpdate(req.user.id,updatedata,{new:true})
-res.redirect("/profile");
+    try {
+        const issue = await issueModel.findById(req.params.id).populate("createdBy", "name email");
+        if (!issue) return res.status(404).send("Issue not found");
+        res.render("issue", { issue });
+    } catch (err) {
+        console.error(err);
+        res.status(500).send("Error loading issue");
     }
-    catch(err){
+});
+
+// Profile edit
+app.get("/profile/edit", isloggedin, async (req, res) => {
+    const user = await userModel.findById(req.user.id);
+    res.render("editprofile", { user });
+});
+
+app.post("/profile/edit", isloggedin, upload.single("profilepic"), async (req, res) => {
+    try {
+        const { name, email } = req.body;
+        let updatedata = { name, email };
+        if (req.file) updatedata.profilepic = req.file.location;
+        await userModel.findByIdAndUpdate(req.user.id, updatedata, { new: true });
+        res.redirect("/profile");
+    } catch (err) {
         console.log(err);
-        if(err.code === 11000){
-            return res.status(400).send("email already exists");
-        }
-      res.status(500).send("could not update profile");
-
+        if (err.code === 11000) return res.status(400).send("email already exists");
+        res.status(500).send("could not update profile");
     }
-})
+});
 
-//show egit issue form
+// Edit issue
 app.get("/issue/edit/:id", isloggedin, async (req, res) => {
-  try {
-    const issue = await issueModel.findById(req.params.id);
-
-    if (!issue) {
-      return res.status(404).send("Issue not found");
+    try {
+        const issue = await issueModel.findById(req.params.id);
+        if (!issue) return res.status(404).send("Issue not found");
+        if (!issue.createdBy || issue.createdBy.toString() !== req.user.id) return res.status(403).send("Not authorized");
+        res.render("editIssue", { issue });
+    } catch (err) {
+        console.error("Edit issue error:", err);
+        res.status(500).send("Server error");
     }
-
-    // safe check
-    if (!issue.createdBy || issue.createdBy.toString() !== req.user.id) {
-      return res.status(403).send("Not authorized");
-    }
-
-    res.render("editIssue", { issue });
-  } catch (err) {
-    console.error("Edit issue error:", err);
-    res.status(500).send("Server error");
-  }
 });
 
-// Handle edit submit
 app.post("/issue/edit/:id", isloggedin, async (req, res) => {
-  const { title, description, manualLocation } = req.body;
-  await issueModel.findOneAndUpdate(
-    { _id: req.params.id, createdBy: req.user.id },
-    { title, description, location: manualLocation }
-  );
-  res.redirect("/profile");
+    const { title, description, manualLocation } = req.body;
+    await issueModel.findOneAndUpdate(
+        { _id: req.params.id, createdBy: req.user.id },
+        { title, description, location: manualLocation }
+    );
+    res.redirect("/profile");
 });
 
-// Delete issue
 app.post("/issue/delete/:id", isloggedin, async (req, res) => {
-  await issueModel.findOneAndDelete({ _id: req.params.id, createdBy: req.user.id });
-  res.redirect("/profile");
+    await issueModel.findOneAndDelete({ _id: req.params.id, createdBy: req.user.id });
+    res.redirect("/profile");
 });
 
 // Admin routes
-const adminRoutes = require("./routes/adminRoutes");
+
 app.use("/admin", adminRoutes);
 
 // Server Listen

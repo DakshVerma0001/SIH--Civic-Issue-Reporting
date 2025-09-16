@@ -1,18 +1,18 @@
-const express = require("express");
+import express from "express";
+import isAdmin from "../middleware/isAdmin.js";   // ✅ path check karo
+
 const router = express.Router();
-const { isLoggedIn, isAdmin } = require("../middleware/auth");
-const adminController = require("../controllers/adminController");
 
-// Dashboard
-router.get("/dashboard", isLoggedIn, isAdmin, adminController.getDashboard);
+router.get("/dashboard", isAdmin, async (req, res) => {
+  try {
+    // Abhi koi DB call nahi to empty array bhej do
+    const issues = [];
 
-// All issues
-router.get("/issues", isLoggedIn, isAdmin, adminController.getAllIssues);
+    res.render("admin/dashboard", { issues }); // ✅ yaha pass karna zaruri hai
+  } catch (err) {
+    console.error("Dashboard error:", err);
+    res.status(500).send("Server Error");
+  }
+});
 
-// Issue detail
-router.get("/issues/:id", isLoggedIn, isAdmin, adminController.getIssueById);
-
-// Close / update status
-router.post("/issues/:id/status", isLoggedIn, isAdmin, adminController.updateStatus);
-
-module.exports = router;
+export default router;

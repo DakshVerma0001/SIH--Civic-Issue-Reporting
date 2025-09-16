@@ -1,6 +1,4 @@
-const { required } = require("mongoose");
-const mongoose=require("mongoose");
-
+import mongoose from "mongoose";
 const issueSchema=mongoose.Schema({
 title:{
     type:String,
@@ -45,4 +43,5 @@ issueSchema.pre("save", function (next) {
   }
   next();
 });
-module.exports=mongoose.model("issue",issueSchema);
+const issueModel = mongoose.model('Issue', issueSchema);
+export default issueModel;  // ✅ default export
