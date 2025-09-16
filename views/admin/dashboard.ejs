@@ -1,14 +1,32 @@
 <h2>Admin Dashboard</h2>
 
+<div style="display:flex; gap:20px;">
+  <div>Total: <%= counts.total %></div>
+  <div>Pending: <%= counts.pending %></div>
+  <div>Approved: <%= counts.approved %></div>
+  <div>Resolved: <%= counts.resolved %></div>
+  <div>Rejected: <%= counts.rejected %></div>
+</div>
+
+<hr />
+
 <div style="display:flex; gap:20px; flex-wrap:wrap;">
-  <% if (typeof issues !== "undefined" && issues.length) { %>
-    <% issues.forEach(i => { %>
-      <div style="width:250px; border:1px solid #ccc; padding:15px;">
-        <h4><%= i.title %></h4>
-        <p><%= i.description %></p>
-      </div>
-    <% }) %>
-  <% } else { %>
-    <p>No issues found.</p>
-  <% } %>
+  <% issues.forEach(i => { %>
+    <div style="border:1px solid #ccc; padding:15px; width:250px;">
+      <h4><%= i.title %></h4>
+      <p><%= i.description %></p>
+      <p>Status: <strong><%= i.status %></strong></p>
+      <p>Priority: <%= i.priority %></p>
+      <p>Category: <%= i.category %></p>
+
+      <% if(i.status === 'pending'){ %>
+        <form method="post" action="/admin/issue/<%= i._id %>/approve">
+          <button type="submit">Approve</button>
+        </form>
+        <form method="post" action="/admin/issue/<%= i._id %>/reject">
+          <button type="submit">Reject</button>
+        </form>
+      <% } %>
+    </div>
+  <% }) %>
 </div>

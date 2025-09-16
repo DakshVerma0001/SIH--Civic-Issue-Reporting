@@ -333,6 +333,9 @@ app.post("/issue/delete/:id", isloggedin, async (req, res) => {
 // Admin routes
 
 app.use("/admin", adminRoutes);
+import issueRoutes from "./routes/issueRoutes.js";
+app.use("/issues", issueRoutes);
+
 
 // Server Listen
 app.listen(3000, () => {
