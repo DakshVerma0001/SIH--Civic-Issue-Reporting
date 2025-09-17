@@ -21,7 +21,15 @@ const userSchema = new mongoose.Schema({
   posts: [{
     type: mongoose.Schema.Types.ObjectId,
     ref: 'issue'
-  }]
+  }],
+  // 👉 Custom ID for user (CFU + 6 digits)
+    customId: {
+      type: String,
+      unique: true,
+      default: function () {
+        return "CFU" + Math.floor(100000 + Math.random() * 900000);
+      },
+    },
 }, { timestamps: true });
 
 // Pre-save hook for CFU id

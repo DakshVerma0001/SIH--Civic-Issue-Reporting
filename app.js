@@ -266,7 +266,7 @@ app.post("/post", isloggedin, upload.single("image"), async (req, res) => {
       <p>Track here: <a href="${issueUrl}">${issueUrl}</a></p>
       <br/><p>Regards,<br/>SIH Civic Portal Team</p>
     `;
-    await sendMail(user.email, `Issue Received — ID: ${newissue._id}`, html);
+    await sendMail(user.email, `Issue Received — ID: ${newissue.customId}`, html);
 
     res.redirect("/profile");
 });

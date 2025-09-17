@@ -48,7 +48,7 @@ const issueSchema = new mongoose.Schema(
       type: String,
       unique: true,
       default: function () {
-        return "CFU" + Math.floor(100000 + Math.random() * 900000);
+        return "CFI" + Math.floor(100000 + Math.random() * 900000);
       },
     },
 
@@ -65,7 +65,7 @@ const issueSchema = new mongoose.Schema(
 issueSchema.pre("save", function (next) {
   if (!this.customId) {
     this.customId =
-      "CFU" + Math.floor(100000 + Math.random() * 900000); // CFU + 6 digits
+      "CFI" + Math.floor(100000 + Math.random() * 900000); // CFU + 6 digits
   }
   next();
 });
