@@ -3,6 +3,9 @@ import isAdmin from "../middleware/isAdmin.js";
 import Issue from "../database/issues.js";
 import { Parser } from "json2csv";        // ✅ CSV
 import ExcelJS from "exceljs";             // ✅ Excel
+import sendMail from "../utils/mailHelper.js";   // 👈 adjust path if needed
+import User from "../database/user.js";        // for getting user's email
+
 
 const router = express.Router();
 
@@ -40,33 +43,91 @@ router.get("/dashboard", isAdmin, async (req, res) => {
 });
 
 /* ========== APPROVE / REJECT / RESOLVE ========== */
-router.post("/approve/:id", isAdmin, async (req, res) => {
+// Approve an issue
+router.post("/issue/:id/approve", async (req, res) => {
   try {
-    await Issue.findByIdAndUpdate(req.params.id, { status: "approved" });
+    const issue = await Issue.findByIdAndUpdate(
+      req.params.id,
+      { status: "approved" },
+      { new: true }
+    ).populate("createdBy", "name email customId");
+
+    if (!issue) return res.status(404).send("Issue not found");
+
+    const html = `
+      <p>Hi ${issue.createdBy.name || "User"},</p>
+      <p>Your issue <strong>${issue.title}</strong> has been <b>APPROVED</b> ✅</p>
+      <p>Issue ID: <strong>${issue.customId}</strong></p>
+      <p>You can track it here:
+         <a href="${process.env.BASE_URL}/issue/${issue.customId}">
+           ${process.env.BASE_URL}/issue/${issue.customId}
+         </a>
+      </p>
+      <br/>Regards,<br/>SIH Civic Portal Team
+    `;
+
+    await sendMail(issue.createdBy.email, `Issue Approved — ID: ${issue.customId}`, html);
+
     res.redirect("/admin/dashboard");
   } catch (err) {
     console.error("Approve error:", err);
-    res.status(500).send("Server Error");
+    res.status(500).send("Error approving issue");
   }
 });
 
-router.post("/reject/:id", isAdmin, async (req, res) => {
+
+// Reject an issue
+router.post("/issue/:id/reject", async (req, res) => {
   try {
-    await Issue.findByIdAndUpdate(req.params.id, { status: "rejected" });
+    const issue = await Issue.findByIdAndUpdate(
+      req.params.id,
+      { status: "rejected" },
+      { new: true }
+    ).populate("createdBy", "name email customId");
+
+    if (!issue) return res.status(404).send("Issue not found");
+
+    const html = `
+      <p>Hi ${issue.createdBy.name || "User"},</p>
+      <p>Your issue <strong>${issue.title}</strong> has been <b>REJECTED</b> ❌</p>
+      <p>Issue ID: <strong>${issue.customId}</strong></p>
+      <p>If you think this was a mistake, please re-submit with more details.</p>
+      <br/>Regards,<br/>SIH Civic Portal Team
+    `;
+
+    await sendMail(issue.createdBy.email, `Issue Rejected — ID: ${issue.customId}`, html);
+
     res.redirect("/admin/dashboard");
   } catch (err) {
     console.error("Reject error:", err);
-    res.status(500).send("Server Error");
+    res.status(500).send("Error rejecting issue");
   }
 });
-
-router.post("/resolve/:id", isAdmin, async (req, res) => {
+// Resolve an issue
+router.post("/issue/:id/resolve", async (req, res) => {
   try {
-    await Issue.findByIdAndUpdate(req.params.id, { status: "resolved" });
+    const issue = await Issue.findByIdAndUpdate(
+      req.params.id,
+      { status: "resolved" },
+      { new: true }
+    ).populate("createdBy", "name email customId");
+
+    if (!issue) return res.status(404).send("Issue not found");
+
+    const html = `
+      <p>Hi ${issue.createdBy.name || "User"},</p>
+      <p>Your issue <strong>${issue.title}</strong> has been <b>RESOLVED</b> 🎉</p>
+      <p>Issue ID: <strong>${issue.customId}</strong></p>
+      <p>Thanks for helping improve the community!</p>
+      <br/>Regards,<br/>SIH Civic Portal Team
+    `;
+
+    await sendMail(issue.createdBy.email, `Issue Resolved — ID: ${issue.customId}`, html);
+
     res.redirect("/admin/dashboard");
   } catch (err) {
     console.error("Resolve error:", err);
-    res.status(500).send("Server Error");
+    res.status(500).send("Error resolving issue");
   }
 });
 

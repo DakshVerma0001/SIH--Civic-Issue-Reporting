@@ -20,13 +20,23 @@
       <p>Category: <%= i.category %></p>
 
       <% if(i.status === 'pending'){ %>
-        <form method="post" action="/admin/issue/<%= i._id %>/approve">
-          <button type="submit">Approve</button>
-        </form>
-        <form method="post" action="/admin/issue/<%= i._id %>/reject">
-          <button type="submit">Reject</button>
-        </form>
-      <% } %>
+  <!-- Approve -->
+  <form action="/admin/issue/<%= i._id %>/approve" method="POST" style="display:inline;">
+    <button type="submit" class="btn btn-success">Approve</button>
+  </form>
+
+  <!-- Reject -->
+  <form action="/admin/issue/<%= i._id %>/reject" method="POST" style="display:inline;">
+    <button type="submit" class="btn btn-danger">Reject</button>
+  </form>
+
+<% } else if(i.status === 'approved'){ %>
+  <!-- Resolve -->
+  <form action="/admin/issue/<%= i._id %>/resolve" method="POST">
+    <button type="submit" class="btn btn-primary">Resolve</button>
+  </form>
+<% } %>
+
     </div>
     <a href="/admin/export/csv" class="btn btn-success">Download CSV</a>
 <a href="/admin/export/excel" class="btn btn-primary">Download Excel</a>

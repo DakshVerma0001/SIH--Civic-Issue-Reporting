@@ -237,51 +237,67 @@ app.get("/post", isloggedin, (req, res) => res.render("post"));
 
 // Post issue handler
 app.post("/post", isloggedin, upload.single("image"), async (req, res) => {
+  try {
     let { title, description, location, latitude, longitude, manualLocation } = req.body;
-    if (!location || location.trim() === "") location = manualLocation || "Unknown Location";
-    if (!title || !description || !location) return res.status(400).send("please fill all the required fields");
+    if (!location || location.trim() === "")
+      location = manualLocation || "Unknown Location";
+    if (!title || !description || !location)
+      return res.status(400).send("please fill all the required fields");
 
     const newissue = await issueModel.create({
-        title,
-        description,
-        location,
-        latitude: latitude || null,
-        longitude: longitude || null,
-        image: req.file ? req.file.location : null, 
-        createdBy: req.user.id
+      title,
+      description,
+      location,
+      latitude: latitude || null,
+      longitude: longitude || null,
+      image: req.file ? req.file.location : null,
+      createdBy: req.user.id,
     });
 
     const user = await userModel.findById(req.user.id);
-    const mapsUrl = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(location)}`;
-    const issueUrl = `${process.env.BASE_URL}/issue/${newissue._id}`;
+    const mapsUrl = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(
+      location
+    )}`;
+    const issueUrl = `${process.env.BASE_URL}/issue/${newissue.customId}`;
+
     const html = `
       <p>Hi ${user.name || "User"},</p>
       <p>Your civic issue has been reported successfully ✅</p>
       <ul>
         <li><strong>User ID:</strong> ${user.customId}</li>
-         <li><strong>Issue ID:</strong> ${newissue.customId}</li>
+        <li><strong>Issue ID:</strong> ${newissue.customId}</li>
         <li><strong>Title:</strong> ${newissue.title}</li>
         <li><strong>Location:</strong> <a href="${mapsUrl}" target="_blank">${location}</a></li>
       </ul>
       <p>Track here: <a href="${issueUrl}">${issueUrl}</a></p>
       <br/><p>Regards,<br/>SIH Civic Portal Team</p>
     `;
+
     await sendMail(user.email, `Issue Received — ID: ${newissue.customId}`, html);
 
     res.redirect("/profile");
+  } catch (err) {
+    console.error(err);
+    res.status(500).send("Something went wrong while posting the issue");
+  }
 });
 
 // Single issue page
-app.get("/issue/:id", isloggedin, async (req, res) => {
-    try {
-        const issue = await issueModel.findById(req.params.id).populate("createdBy", "name email");
-        if (!issue) return res.status(404).send("Issue not found");
-        res.render("issue", { issue });
-    } catch (err) {
-        console.error(err);
-        res.status(500).send("Error loading issue");
-    }
+app.get("/issue/:customId", isloggedin, async (req, res) => {
+  try {
+    const issue = await issueModel
+      .findOne({ customId: req.params.customId })
+      .populate("createdBy", "name email");
+
+    if (!issue) return res.status(404).send("Issue not found");
+
+    res.render("issue", { issue });
+  } catch (err) {
+    console.error(err);
+    res.status(500).send("Error loading issue");
+  }
 });
+
 
 // Profile edit
 app.get("/profile/edit", isloggedin, async (req, res) => {
