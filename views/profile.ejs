@@ -16,8 +16,13 @@
  <p>Address: <%= user && user.address ? user.address : "Not Provided" %></p>
   <p>Role: <%= user.role %></p>
 
-  <a href="/profile/edit">Edit Profile</a>
+  <a href="/profile/edit">Edit Profile</a><br>
 <a href="/logout">logout</a>
+<br>
+<a href="/post" class="btn btn-primary" style="margin-bottom:10px;">
+  + Post New Issue
+</a>
+
     <h2>Your Issues</h2>
     <div class="issues-container">
         <% if (issues && issues.length > 0) { %>

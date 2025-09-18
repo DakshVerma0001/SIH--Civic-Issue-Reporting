@@ -1,5 +1,6 @@
 <h2>Admin Dashboard</h2>
 
+
 <div style="display:flex; gap:20px;">
   <div>Total: <%= counts.total %></div>
   <div>Pending: <%= counts.pending %></div>
@@ -9,6 +10,11 @@
 </div>
 
 <hr />
+
+ </div>
+    <a href="/admin/export/csv" class="btn btn-success">Download CSV</a>
+<a href="/admin/export/excel" class="btn btn-primary">Download Excel</a>
+</div>
 
 <div style="display:flex; gap:20px; flex-wrap:wrap;">
   <% issues.forEach(i => { %>
