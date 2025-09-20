@@ -1,24 +1,83 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Edit Issue</title>
+  <style>
+    body {
+      margin: 0;
+      font-family: Arial, sans-serif;
+      background: linear-gradient(to bottom right, #2e8b57, #1e90ff);
+      color: #333;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+    }
+    .container {
+      background: #fff;
+      padding: 30px;
+      border-radius: 12px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+      width: 90%;
+      max-width: 500px;
+    }
+    h1 {
+      text-align: center;
+      color: #2e8b57;
+      margin-bottom: 20px;
+    }
+    label {
+      font-weight: bold;
+      display: block;
+      margin-bottom: 6px;
+      color: #2e8b57;
+    }
+    input[type="text"],
+    textarea {
+      width: 100%;
+      padding: 10px;
+      border: 1px solid #ccc;
+      border-radius: 8px;
+      margin-bottom: 16px;
+      font-size: 1rem;
+    }
+    textarea {
+      resize: vertical;
+      min-height: 100px;
+    }
+    button {
+      width: 100%;
+      padding: 12px;
+      background: #2e8b57;
+      border: none;
+      border-radius: 8px;
+      font-size: 1rem;
+      color: white;
+      cursor: pointer;
+      transition: background 0.3s ease;
+    }
+    button:hover {
+      background: #1e90ff;
+    }
+  </style>
 </head>
 <body>
-  <h1>Edit Issue</h1>
-  <form action="/issue/edit/<%= issue._id %>" method="POST">
-    <label>Title:</label>
-    <input type="text" name="title" value="<%= issue.title %>" required>
-    <br>
+  <div class="container">
+    <h1>Edit Issue</h1>
+    <form action="/issue/edit/<%= issue._id %>" method="POST">
+      <label for="title">Title:</label>
+      <input type="text" id="title" name="title" value="<%= issue.title %>" required>
 
-    <label>Description:</label>
-    <textarea name="description" required><%= issue.description %></textarea>
-    <br>
+      <label for="description">Description:</label>
+      <textarea id="description" name="description" required><%= issue.description %></textarea>
 
-    <label>Location:</label>
-    <input type="text" name="manualLocation" value="<%= issue.location %>">
-    <br>
+      <label for="manualLocation">Location:</label>
+      <input type="text" id="manualLocation" name="manualLocation" value="<%= issue.location %>">
 
-    <button type="submit">Save Changes</button>
-  </form>
+      <button type="submit">Save Changes</button>
+    </form>
+  </div>
 </body>
 </html>

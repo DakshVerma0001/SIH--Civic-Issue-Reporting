@@ -14,6 +14,8 @@ import multerS3 from "multer-s3";
 import dotenv from "dotenv";
 import adminRoutes from "./routes/adminRoutes.js"; // <-- converted require to import
 
+
+
 dotenv.config();
 
 if (!process.env.JWT_SECRET) {
@@ -28,6 +30,7 @@ const verifiedEmails = {}; // { "<email>": timestampUntilValid }
 const VERIFIED_TTL_MS = 10 * 60 * 1000; // 10 minutes window
 
 const app = express();
+//
 
 // ---------- Reverse Geocode API ----------
 app.get("/reverse-geocode", async (req, res) => {

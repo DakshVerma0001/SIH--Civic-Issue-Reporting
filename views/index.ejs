@@ -1,14 +1,145 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Document</title>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>CivicFix – Report & Resolve Civic Issues</title>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
+  <style>
+    * { margin:0; padding:0; box-sizing:border-box; }
+    body { font-family:'Poppins',sans-serif; }
+
+    /* Navbar */
+    .navbar {
+      position: fixed;
+      top:0; left:0; right:0;
+      height:70px;
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      padding:0 50px;
+      background: rgba(24,90,157,0.8);
+      backdrop-filter: blur(6px);
+      z-index:100;
+    }
+    .navbar h2 { color:#fff; font-size:1.6rem; font-weight:700; }
+    .navbar a {
+      color:#fff;
+      margin-left:30px;
+      text-decoration:none;
+      font-weight:500;
+      transition:color .3s;
+    }
+    .navbar a:hover { color:#43cea2; }
+
+    /* Hero */
+    .hero {
+      position: relative;
+      height:100vh;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      text-align:center;
+      color:#fff;
+      overflow:hidden;
+    }
+    .hero img {
+      position:absolute;
+      width:100%;
+      height:100%;
+      object-fit:cover;
+      z-index:-2;
+    }
+    .hero::after {
+      content:"";
+      position:absolute;
+      inset:0;
+      background: linear-gradient(135deg, rgba(67,206,162,0.4), rgba(24,90,157,0.5));
+      z-index:-1;
+    }
+    .hero-content { max-width: 700px; padding:0 20px; }
+    .hero h1 { font-size:3rem; font-weight:700; margin-bottom:1rem; line-height:1.2; }
+    .hero p { font-size:1.25rem; line-height:1.6; }
+
+    /* Features */
+    .features {
+      background:#f9f9f9;
+      padding:80px 20px;
+      display:grid;
+      grid-template-columns: repeat(auto-fit,minmax(280px,1fr));
+      gap:30px;
+    }
+    .card {
+      background:#fff;
+      border-radius:16px;
+      padding:30px;
+      text-align:center;
+      box-shadow:0 4px 10px rgba(0,0,0,0.08);
+      transition: transform .3s;
+    }
+    .card:hover { transform:translateY(-6px); }
+    .card img { width:60px; margin-bottom:15px; }
+    .card h3 { margin-bottom:10px; color:#185a9d; }
+
+    footer {
+      text-align:center;
+      padding:30px;
+      background:#185a9d;
+      color:#fff;
+    }
+
+    @media(max-width:600px){
+      .hero h1{font-size:2.2rem;}
+      .hero p{font-size:1.1rem;}
+    }
+  </style>
 </head>
 <body>
- 
- <a href="/register">register</a>
- <a href="/login">login</a>
-   
+
+  <!-- Navbar -->
+  <nav class="navbar">
+    <div>
+      <h2>CivicFix</h2>
+    </div>
+    
+    <div>
+      <a href="/register">Register</a>
+      <a href="/login">Login</a>
+    </div>
+  </nav>
+
+  <!-- Hero -->
+  <section class="hero">
+    <img src="https://www.eqimg.com/images/2024/1920x1080/09022024-image1-equitymaster.jpg" alt="city view">
+    <div class="hero-content">
+      <h1>Report, Track & Resolve Civic Issues</h1>
+      <p>Join your community in making cities cleaner, safer, and smarter with real-time civic engagement.</p>
+    </div>
+  </section>
+
+  <!-- Features -->
+  <section class="features">
+    <div class="card">
+      <img src="https://img.icons8.com/fluency/96/000000/camera.png" alt="">
+      <h3>Smart Reporting</h3>
+      <p>Quickly report issues with photos, videos, and live GPS to help authorities take immediate action.</p>
+    </div>
+    <div class="card">
+      <img src="https://img.icons8.com/fluency/96/000000/group.png" alt="">
+      <h3>Collaborative Platform</h3>
+      <p>Work together with neighbors to verify, support, and prioritize issues for maximum community impact.</p>
+    </iv>
+    <div class="card">
+      <img src="https://img.icons8.com/fluency/96/000000/marker.png" alt="">
+      <h3>Real-Time Tracking</h3>
+      <p>Stay updated with live notifications as reported issues get resolved step by step.</p>
+    </div>
+  </section>
+
+  <!-- Footer -->
+  <footer>
+    © 2025 CivicFix • Building smarter, responsive, and sustainable cities
+  </footer>
+
 </body>
 </html>

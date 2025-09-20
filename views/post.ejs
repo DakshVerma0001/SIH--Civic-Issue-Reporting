@@ -1,34 +1,111 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Document</title>
-    <script src="https://cdn.tailwindcss.com"></script>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Post New Issue</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 0;
+      padding: 0;
+      background: linear-gradient(135deg, #e8f5e9, #e3f2fd);
+      color: #333;
+    }
+    header {
+      background: #2e7d32;
+      color: white;
+      text-align: center;
+      padding: 20px;
+    }
+    header h1 {
+      margin: 0;
+      font-size: 26px;
+    }
+    .container {
+      max-width: 650px;
+      margin: 40px auto;
+      padding: 25px;
+      background: white;
+      border-radius: 12px;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+    }
+    label {
+      font-weight: bold;
+      margin-bottom: 5px;
+      display: block;
+    }
+    input[type="text"],
+    textarea,
+    input[type="file"] {
+      width: 100%;
+      padding: 10px;
+      margin-bottom: 15px;
+      border: 1px solid #ccc;
+      border-radius: 6px;
+      font-size: 15px;
+    }
+    textarea {
+      min-height: 120px;
+      resize: vertical;
+    }
+    button,
+    input[type="submit"] {
+      background: #42a5f5;
+      color: white;
+      border: none;
+      border-radius: 6px;
+      padding: 10px 16px;
+      font-size: 15px;
+      cursor: pointer;
+      margin-right: 8px;
+      transition: background 0.3s;
+    }
+    button:hover,
+    input[type="submit"]:hover {
+      background: #1e88e5;
+    }
+    .manual-box {
+      background: #f1f8e9;
+      padding: 10px;
+      border-radius: 8px;
+      margin-bottom: 15px;
+    }
+  </style>
 </head>
 <body>
-    <form action="/post" method="post" enctype="multipart/form-data">
-<input type="text" placeholder="enter title" name="title">
-<textarea placeholder="enter your problem!" name="description" ></textarea>
-  <input type="hidden" name="location" id="location">
-<input type="hidden" name="latitude" id="latitude">
-<input type="hidden" name="longitude" id="longitude">
-<br> <br>
 
- <!-- Manual input -->
-  <div id="manualLocationBox">
-    <label>Enter location manually (if you don’t want auto):</label>
-    <input type="text"  id="manualLocation" name="manualLocation" placeholder="Enter location">
+  <header>
+    <h1>Post a New Civic Issue</h1>
+  </header>
+
+  <div class="container">
+    <form action="/post" method="post" enctype="multipart/form-data">
+      <label for="title">Title</label>
+      <input type="text" id="title" placeholder="Enter issue title" name="title" required>
+
+      <label for="description">Description</label>
+      <textarea id="description" placeholder="Describe your problem..." name="description" required></textarea>
+
+      <!-- Hidden fields for location -->
+      <input type="hidden" name="location" id="location">
+      <input type="hidden" name="latitude" id="latitude">
+      <input type="hidden" name="longitude" id="longitude">
+
+      <div class="manual-box">
+        <label for="manualLocation">Enter location manually (optional):</label>
+        <input type="text" id="manualLocation" name="manualLocation" placeholder="Type location here">
+        <button type="button" onclick="getLocation()">📍 Use My Location</button>
+      </div>
+
+      <label for="image">Upload Image</label>
+      <input type="file" id="image" name="image">
+
+      <input type="submit" value="Submit Issue">
+    </form>
   </div>
 
-  <!-- Button for auto location -->
-  <button type="button" onclick="getLocation()">📍 Use My Location</button>
-
-<input type="file" name="image" class="border p-2 rounded w-full">
-<input type="submit" value="submit issue">
-    </form>
-
- <script>
+  <script>
     async function getLocation() {
       if (navigator.geolocation) {
         navigator.geolocation.getCurrentPosition(
@@ -45,10 +122,8 @@
               const data = await res.json();
 
               if (data && data.display_name) {
-                // set in hidden location
                 document.getElementById("location").value = data.display_name;
-                // also update manual input box so user can see/edit
-              document.getElementById("manualLocation").value = data.display_name;
+                document.getElementById("manualLocation").value = data.display_name;
               } else {
                 document.getElementById("location").value = `${lat}, ${lon}`;
                 document.getElementById("manualLocation").value = `${lat}, ${lon}`;
@@ -59,9 +134,7 @@
               document.getElementById("manualLocation").value = `${lat}, ${lon}`;
             }
           },
-          (err) => {
-            alert("Location access denied. Please type manually.");
-          },
+          () => alert("Location access denied. Please type manually."),
           { enableHighAccuracy: true, timeout: 10000, maximumAge: 0 }
         );
       } else {
@@ -69,5 +142,6 @@
       }
     }
   </script>
+
 </body>
 </html>

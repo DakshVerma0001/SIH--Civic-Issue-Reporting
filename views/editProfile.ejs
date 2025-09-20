@@ -1,21 +1,100 @@
-<h2>Edit Profile</h2>
-<form action="/profile/edit" method="POST" enctype="multipart/form-data">
-  <label for="name">Name:</label>
-  <input type="text" id="name" name="name" value="<%= user.name %>" required>
-  <br>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Edit Profile</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 0;
+      padding: 0;
+      background: linear-gradient(135deg, #e8f5e9, #e3f2fd);
+      color: #333;
+    }
+    header {
+      background: #2e7d32;
+      color: white;
+      text-align: center;
+      padding: 20px;
+    }
+    header h2 {
+      margin: 0;
+      font-size: 26px;
+    }
+    .container {
+      max-width: 600px;
+      margin: 40px auto;
+      padding: 25px;
+      background: white;
+      border-radius: 12px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+    }
+    label {
+      display: block;
+      margin-bottom: 5px;
+      font-weight: bold;
+    }
+    input[type="text"],
+    input[type="email"],
+    input[type="file"] {
+      width: 100%;
+      padding: 10px;
+      margin-bottom: 18px;
+      border: 1px solid #ccc;
+      border-radius: 6px;
+      font-size: 15px;
+    }
+    button {
+      background: #42a5f5;
+      color: white;
+      border: none;
+      padding: 10px 18px;
+      font-size: 16px;
+      border-radius: 6px;
+      cursor: pointer;
+      transition: background 0.3s;
+    }
+    button:hover {
+      background: #1e88e5;
+    }
+    .back-link {
+      display: inline-block;
+      margin-top: 15px;
+      text-decoration: none;
+      color: #2e7d32;
+      font-weight: bold;
+    }
+    .back-link:hover {
+      text-decoration: underline;
+    }
+  </style>
+</head>
+<body>
 
-  <label for="email">Email:</label>
-  <input type="email" id="email" name="email" value="<%= user.email %>" required>
-  <br>
+  <header>
+    <h2>Edit Profile</h2>
+  </header>
 
-  
-  <label for="email">Address:</label>
-  <input type="text" id="address" name="address" value="<%= user.address %>" required>
-  <br>
+  <div class="container">
+    <form action="/profile/edit" method="POST" enctype="multipart/form-data">
+      <label for="name">Name</label>
+      <input type="text" id="name" name="name" value="<%= user.name %>" required>
 
-  <label for="profilepic">Profile Picture:</label>
-  <input type="file" id="profilepic" name="profilepic">
-  <br>
+      <label for="email">Email</label>
+      <input type="email" id="email" name="email" value="<%= user.email %>" required>
 
-  <button type="submit">Update</button>
-</form>
+      <label for="address">Address</label>
+      <input type="text" id="address" name="address" value="<%= user.address %>" required>
+
+      <label for="profilepic">Profile Picture</label>
+      <input type="file" id="profilepic" name="profilepic">
+
+      <button type="submit">Update</button>
+    </form>
+
+    <a href="/profile" class="back-link">⬅ Back to Profile</a>
+  </div>
+
+</body>
+</html>

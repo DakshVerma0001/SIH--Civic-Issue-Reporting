@@ -4,140 +4,214 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>User Register</title>
-  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    body {
+      margin: 0;
+      font-family: Arial, sans-serif;
+      background: linear-gradient(to bottom right, #4CAF50, #2196F3);
+      min-height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      padding: 20px;
+    }
+
+    .register-container {
+      background: #fff;
+      padding: 30px;
+      border-radius: 12px;
+      box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+      max-width: 480px;
+      width: 100%;
+    }
+
+    h1 {
+      text-align: center;
+      margin-bottom: 25px;
+      font-size: 1.8rem;
+      color: #2196F3;
+    }
+
+    input[type="text"],
+    input[type="email"],
+    input[type="password"],
+    input[type="tel"] {
+      width: 100%;
+      padding: 12px;
+      margin-top: 8px;
+      border: 1px solid #ccc;
+      border-radius: 8px;
+      font-size: 1rem;
+    }
+
+    #sendOtpBtn,
+    #verifyOtpBtn,
+    button[type="button"],
+    input[type="submit"] {
+      padding: 10px 16px;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      font-size: 1rem;
+    }
+
+    #sendOtpBtn { background: #2196F3; color: white; margin-top: 8px; }
+    #sendOtpBtn:hover { background: #1976D2; }
+
+    #verifyOtpBtn { background: #4CAF50; color: white; margin-top: 8px; }
+    #verifyOtpBtn:hover { background: #45a049; }
+
+    button[onclick="getLocation()"] {
+      background: #2196F3;
+      color: white;
+      width: 100%;
+      margin-top: 12px;
+    }
+    button[onclick="getLocation()"]:hover { background: #1976D2; }
+
+    input[type="submit"] {
+      background: #4CAF50;
+      color: white;
+      width: 100%;
+      margin-top: 16px;
+      font-size: 1.1rem;
+    }
+    input[type="submit"]:hover { background: #45a049; }
+
+    #otpBox {
+      margin-top: 10px;
+    }
+
+    #otpStatus {
+      display: inline-block;
+      margin-left: 8px;
+      font-size: 0.9rem;
+      color: #555;
+    }
+  </style>
 </head>
-<body class="p-6">
-  <h1 class="text-2xl font-bold mb-4">User Register</h1>
+<body>
+  <div class="register-container">
+    <h1>User Register</h1>
 
-  <form action="/register" method="post" class="space-y-4">
-    <input type="text" placeholder="Enter name" name="name" required class="border p-2 rounded w-full" />
-    <!-- Email + verify UI -->
-<div>
-  <input id="emailInput" type="email" name="email" placeholder="Enter email" required class="border p-2 rounded w-full"/>
-  <div id="emailActions" class="mt-2">
-    <button id="sendOtpBtn" type="button" class="bg-blue-500 text-white px-3 py-1 rounded">Verify email</button>
+    <form action="/register" method="post">
+      <input type="text" placeholder="Enter name" name="name" required />
+
+      <!-- Email + OTP -->
+      <div>
+        <input id="emailInput" type="email" name="email" placeholder="Enter email" required />
+        <button id="sendOtpBtn" type="button">Verify Email</button>
+
+        <div id="otpBox" style="display:none;">
+          <input id="otpInput" type="text" placeholder="Enter OTP" />
+          <button id="verifyOtpBtn" type="button">Verify OTP</button>
+          <span id="otpStatus"></span>
+        </div>
+
+        <input type="hidden" name="email_verified" id="email_verified" value="false" />
+      </div>
+
+      <input type="password" placeholder="Enter password" name="password" required />
+      <input type="password" placeholder="Confirm password" name="confirmpassword" required />
+      <input type="tel" placeholder="Enter phone number" name="phone" required />
+
+      <input type="hidden" name="role" value="citizen" />
+      <input type="hidden" name="latitude" id="latitude" />
+      <input type="hidden" name="longitude" id="longitude" />
+
+      <input type="text" name="address" id="address" placeholder="Enter address manually" />
+
+      <button type="button" onclick="getLocation()">📍 Use My Location</button>
+      <input type="submit" value="Register" />
+    </form>
   </div>
-  <div id="otpBox" style="display:none; margin-top:8px;">
-    <input id="otpInput" type="text" placeholder="Enter OTP" class="border p-2 rounded" />
-    <button id="verifyOtpBtn" type="button" class="bg-green-500 text-white px-3 py-1 rounded">Verify OTP</button>
-    <span id="otpStatus" style="margin-left:8px;"></span>
-  </div>
 
-  <!-- hidden flag to send to server on register submit -->
-  <input type="hidden" name="email_verified" id="email_verified" value="false" />
-</div>
+  <script>
+    document.getElementById("sendOtpBtn").addEventListener("click", async () => {
+      const email = document.getElementById("emailInput").value.trim();
+      if (!email) { alert("Enter email first"); return; }
 
-    <input type="password" placeholder="Enter password" name="password" required class="border p-2 rounded w-full" />
-    <input type="password" placeholder="Confirm password" name="confirmpassword" required class="border p-2 rounded w-full" />
-    <input type="tel" placeholder="Enter phone number" name="phone" required class="border p-2 rounded w-full" />
-
-    <!-- role hidden -->
-    <input type="hidden" name="role" value="citizen" />
-
-    <!-- location hidden -->
-    <input type="hidden" name="latitude" id="latitude" />
-    <input type="hidden" name="longitude" id="longitude" />
-
-    <!-- address input -->
-    <input type="text" name="address" id="address" placeholder="Enter address manually" class="border p-2 rounded w-full" />
-
-    <!-- button for auto location -->
-    <button type="button" onclick="getLocation()" class="bg-blue-500 text-white px-4 py-2 rounded">📍 Use My Location</button>
-
-    <input type="submit" value="Register" class="bg-green-600 text-white px-4 py-2 rounded cursor-pointer" />
-  </form>
-
- <script>
-
-  document.getElementById("sendOtpBtn").addEventListener("click", async () => {
-    const email = document.getElementById("emailInput").value.trim();
-    if (!email) { alert("Enter email first"); return; }
-
-    try {
-      const res = await fetch("/send-email-otp", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email })
-      });
-      const data = await res.json();
-      if (data.success) {
-        document.getElementById("otpBox").style.display = "block";
-        document.getElementById("otpStatus").textContent = "OTP sent. Check your email.";
-      } else {
-        document.getElementById("otpStatus").textContent = data.msg || "Failed to send OTP";
-      }
-    } catch (err) {
-      console.error(err);
-      document.getElementById("otpStatus").textContent = "Error sending OTP";
-    }
-  });
-
-  document.getElementById("verifyOtpBtn").addEventListener("click", async () => {
-    const email = document.getElementById("emailInput").value.trim();
-    const otp = document.getElementById("otpInput").value.trim();
-    if (!otp) { alert("Enter OTP"); return; }
-
-    try {
-      const res = await fetch("/verify-email-otp", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email, otp })
-      });
-      const data = await res.json();
-      if (data.success) {
-        document.getElementById("email_verified").value = "true";
-        document.getElementById("otpStatus").textContent = "Verified ✅";
-        // optionally disable email field and hide OTP UI
-        document.getElementById("emailInput").readOnly = true;
-        document.getElementById("sendOtpBtn").disabled = true;
-        document.getElementById("otpBox").style.display = "none";
-      } else {
-        document.getElementById("otpStatus").textContent = data.msg || "Invalid OTP";
-      }
-    } catch (err) {
-      console.error(err);
-      document.getElementById("otpStatus").textContent = "Verification error";
-    }
-  });
-
-  // optional: prevent register submission unless verified
-  const form = document.querySelector('form[action="/register"]');
-  if (form) {
-    form.addEventListener("submit", (e) => {
-      const verified = document.getElementById("email_verified").value === "true";
-      if (!verified) {
-        e.preventDefault();
-        alert("Please verify your email before registering");
+      try {
+        const res = await fetch("/send-email-otp", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ email })
+        });
+        const data = await res.json();
+        if (data.success) {
+          document.getElementById("otpBox").style.display = "block";
+          document.getElementById("otpStatus").textContent = "OTP sent. Check your email.";
+        } else {
+          document.getElementById("otpStatus").textContent = data.msg || "Failed to send OTP";
+        }
+      } catch (err) {
+        console.error(err);
+        document.getElementById("otpStatus").textContent = "Error sending OTP";
       }
     });
-  }
 
+    document.getElementById("verifyOtpBtn").addEventListener("click", async () => {
+      const email = document.getElementById("emailInput").value.trim();
+      const otp = document.getElementById("otpInput").value.trim();
+      if (!otp) { alert("Enter OTP"); return; }
 
-  async function getLocation() {
-    if (navigator.geolocation) {
-      navigator.geolocation.getCurrentPosition(
-        async (pos) => {
-          const lat = pos.coords.latitude;
-          const lon = pos.coords.longitude;
+      try {
+        const res = await fetch("/verify-email-otp", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ email, otp })
+        });
+        const data = await res.json();
+        if (data.success) {
+          document.getElementById("email_verified").value = "true";
+          document.getElementById("otpStatus").textContent = "Verified ✅";
+          document.getElementById("emailInput").readOnly = true;
+          document.getElementById("sendOtpBtn").disabled = true;
+          document.getElementById("otpBox").style.display = "none";
+        } else {
+          document.getElementById("otpStatus").textContent = data.msg || "Invalid OTP";
+        }
+      } catch (err) {
+        console.error(err);
+        document.getElementById("otpStatus").textContent = "Verification error";
+      }
+    });
 
-          document.getElementById("latitude").value = lat;
-          document.getElementById("longitude").value = lon;
-
-          try {
-            const res = await fetch(`/reverse-geocode?lat=${lat}&lon=${lon}`);
-            const data = await res.json();
-            if (data && data.display_name) {
-              document.getElementById("address").value = data.display_name;
-            }
-          } catch (err) {
-            console.error(err);
-          }
-        },
-        () => alert("Location access denied"),
-        { enableHighAccuracy: true, timeout: 10000 }
-      );
+    const form = document.querySelector('form[action="/register"]');
+    if (form) {
+      form.addEventListener("submit", (e) => {
+        const verified = document.getElementById("email_verified").value === "true";
+        if (!verified) {
+          e.preventDefault();
+          alert("Please verify your email before registering");
+        }
+      });
     }
-  }
-</script>
+
+    async function getLocation() {
+      if (navigator.geolocation) {
+        navigator.geolocation.getCurrentPosition(
+          async (pos) => {
+            const lat = pos.coords.latitude;
+            const lon = pos.coords.longitude;
+            document.getElementById("latitude").value = lat;
+            document.getElementById("longitude").value = lon;
+
+            try {
+              const res = await fetch(`/reverse-geocode?lat=${lat}&lon=${lon}`);
+              const data = await res.json();
+              if (data && data.display_name) {
+                document.getElementById("address").value = data.display_name;
+              }
+            } catch (err) {
+              console.error(err);
+            }
+          },
+          () => alert("Location access denied"),
+          { enableHighAccuracy: true, timeout: 10000 }
+        );
+      }
+    }
+  </script>
 </body>
 </html>

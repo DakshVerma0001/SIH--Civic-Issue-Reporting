@@ -1,51 +1,151 @@
-<h2>Admin Dashboard</h2>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Admin Dashboard</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 0;
+      background: linear-gradient(135deg, #e8f5e9, #e3f2fd);
+      color: #333;
+    }
+    header {
+      background: #2e7d32;
+      padding: 20px;
+      text-align: center;
+      color: white;
+    }
+    header h2 {
+      margin: 0;
+      font-size: 28px;
+    }
+    .stats {
+      display: flex;
+      justify-content: center;
+      flex-wrap: wrap;
+      gap: 25px;
+      margin: 25px auto;
+      max-width: 800px;
+    }
+    .stat-card {
+      background: white;
+      padding: 15px 25px;
+      border-radius: 8px;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+      font-size: 18px;
+      font-weight: bold;
+      min-width: 120px;
+      text-align: center;
+    }
+    .actions {
+      text-align: center;
+      margin-bottom: 25px;
+    }
+    .actions a {
+      display: inline-block;
+      margin: 0 10px;
+      padding: 10px 18px;
+      text-decoration: none;
+      color: white;
+      border-radius: 6px;
+      font-size: 15px;
+    }
+    .csv-btn { background: #2e7d32; }
+    .excel-btn { background: #1e88e5; }
+    .issue-container {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 25px;
+      justify-content: center;
+      padding: 0 20px 40px;
+    }
+    .issue-card {
+      background: white;
+      border-radius: 10px;
+      box-shadow: 0 3px 8px rgba(0,0,0,0.1);
+      width: 260px;
+      padding: 18px;
+    }
+    .issue-card h4 {
+      margin: 0 0 8px;
+      color: #2e7d32;
+    }
+    .issue-card p {
+      margin: 6px 0;
+      font-size: 14px;
+    }
+    .issue-card form {
+      display: inline-block;
+      margin-top: 8px;
+    }
+    .btn {
+      padding: 6px 12px;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+      font-size: 13px;
+      color: white;
+    }
+    .btn-success { background: #43a047; }
+    .btn-danger { background: #e53935; }
+    .btn-primary { background: #1e88e5; }
+    .btn-success:hover { background: #2e7d32; }
+    .btn-danger:hover { background: #c62828; }
+    .btn-primary:hover { background: #1565c0; }
+  </style>
+</head>
+<body>
 
+  <header>
+    <h2>Admin Dashboard</h2>
+  </header>
 
-<div style="display:flex; gap:20px;">
-  <div>Total: <%= counts.total %></div>
-  <div>Pending: <%= counts.pending %></div>
-  <div>Approved: <%= counts.approved %></div>
-  <div>Resolved: <%= counts.resolved %></div>
-  <div>Rejected: <%= counts.rejected %></div>
-</div>
+  <!-- Stats Section -->
+  <div class="stats">
+    <div class="stat-card">Total: <%= counts.total %></div>
+    <div class="stat-card">Pending: <%= counts.pending %></div>
+    <div class="stat-card">Approved: <%= counts.approved %></div>
+    <div class="stat-card">Resolved: <%= counts.resolved %></div>
+    <div class="stat-card">Rejected: <%= counts.rejected %></div>
+  </div>
 
-<hr />
+  <!-- Download buttons -->
+  <div class="actions">
+    <a href="/admin/export/csv" class="csv-btn">⬇ Download CSV</a>
+    <a href="/admin/export/excel" class="excel-btn">⬇ Download Excel</a>
+  </div>
 
- </div>
-    <a href="/admin/export/csv" class="btn btn-success">Download CSV</a>
-<a href="/admin/export/excel" class="btn btn-primary">Download Excel</a>
-</div>
+  <!-- Issues List -->
+  <div class="issue-container">
+    <% if (issues && issues.length > 0) { %>
+      <% issues.forEach(i => { %>
+        <div class="issue-card">
+          <h4><%= i.title %></h4>
+          <p><%= i.description %></p>
+          <p><strong>Status:</strong> <%= i.status %></p>
+          <p><strong>Priority:</strong> <%= i.priority || "N/A" %></p>
+          <p><strong>Category:</strong> <%= i.category || "N/A" %></p>
 
-<div style="display:flex; gap:20px; flex-wrap:wrap;">
-  <% issues.forEach(i => { %>
-    <div style="border:1px solid #ccc; padding:15px; width:250px;">
-      <h4><%= i.title %></h4>
-      <p><%= i.description %></p>
-      <p>Status: <strong><%= i.status %></strong></p>
-      <p>Priority: <%= i.priority %></p>
-      <p>Category: <%= i.category %></p>
+          <% if(i.status === 'pending'){ %>
+            <form action="/admin/issue/<%= i._id %>/approve" method="POST">
+              <button type="submit" class="btn btn-success">Approve</button>
+            </form>
+            <form action="/admin/issue/<%= i._id %>/reject" method="POST">
+              <button type="submit" class="btn btn-danger">Reject</button>
+            </form>
+          <% } else if(i.status === 'approved'){ %>
+            <form action="/admin/issue/<%= i._id %>/resolve" method="POST">
+              <button type="submit" class="btn btn-primary">Resolve</button>
+            </form>
+          <% } %>
+        </div>
+      <% }) %>
+    <% } else { %>
+      <p style="text-align:center; font-size:16px;">No issues found.</p>
+    <% } %>
+  </div>
 
-      <% if(i.status === 'pending'){ %>
-  <!-- Approve -->
-  <form action="/admin/issue/<%= i._id %>/approve" method="POST" style="display:inline;">
-    <button type="submit" class="btn btn-success">Approve</button>
-  </form>
-
-  <!-- Reject -->
-  <form action="/admin/issue/<%= i._id %>/reject" method="POST" style="display:inline;">
-    <button type="submit" class="btn btn-danger">Reject</button>
-  </form>
-
-<% } else if(i.status === 'approved'){ %>
-  <!-- Resolve -->
-  <form action="/admin/issue/<%= i._id %>/resolve" method="POST">
-    <button type="submit" class="btn btn-primary">Resolve</button>
-  </form>
-<% } %>
-
-    </div>
-    <a href="/admin/export/csv" class="btn btn-success">Download CSV</a>
-<a href="/admin/export/excel" class="btn btn-primary">Download Excel</a>
-
-  <% }) %>
-</div>
+</body>
+</html>

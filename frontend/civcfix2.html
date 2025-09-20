@@ -1,0 +1,2522 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>CivicFix – Professional Community Portal</title>
+<style>
+  :root{
+    --primary-dark:#2c3e50;
+    --primary-medium:#34495e;
+    --primary-light:#7f8c8d;
+    --accent-blue:#3498db;
+    --accent-success:#27ae60;
+    --accent-warning:#f39c12;
+    --accent-danger:#e74c3c;
+    --neutral-50:#f8f9fa;
+    --neutral-100:#e9ecef;
+    --neutral-200:#dee2e6;
+    --neutral-300:#ced4da;
+    --neutral-400:#adb5bd;
+    --neutral-500:#6c757d;
+    --neutral-600:#495057;
+    --neutral-700:#343a40;
+    --neutral-800:#212529;
+    --neutral-900:#0d1117;
+    --bg-main:#f4f6f9;
+    --bg-card:#ffffff;
+    --shadow-sm: 0 2px 4px rgba(52, 58, 64, 0.08);
+    --shadow-md: 0 4px 16px rgba(52, 58, 64, 0.12);
+    --shadow-lg: 0 8px 32px rgba(52, 58, 64, 0.16);
+  }
+  
+  *{box-sizing:border-box;margin:0;padding:0}
+  html,body{height:100%}
+  body{
+    font-family:'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
+    background:var(--bg-main);
+    color:var(--neutral-800);
+    line-height:1.6;
+    -webkit-font-smoothing:antialiased;
+    -moz-osx-font-smoothing:grayscale;
+  }
+  a{color:inherit;text-decoration:none}
+
+  /* SPLASH */
+  #splash{
+    position:fixed;inset:0;display:flex;flex-direction:column;align-items:center;
+    justify-content:center;background:linear-gradient(135deg, var(--bg-main) 0%, var(--neutral-100) 100%);
+    z-index:9999;transition:all .6s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+  .splash-logo{
+    width:140px;height:140px;border-radius:20px;
+    background:linear-gradient(135deg,var(--primary-dark),var(--primary-medium));
+    display:flex;align-items:center;justify-content:center;color:#fff;
+    font-weight:700;font-size:28px;box-shadow:var(--shadow-lg);
+    animation:pulse 2s infinite;overflow:hidden;
+  }
+  .splash-logo img{width:80%;height:80%;object-fit:contain;filter:brightness(0) invert(1)}
+  .splash-logo .fallback{display:none}
+  .splash-sub{
+    margin-top:20px;color:var(--primary-dark);font-size:16px;font-weight:500;
+    letter-spacing:0.5px;
+  }
+  @keyframes pulse{
+    0%{transform:scale(1);box-shadow:var(--shadow-lg)}
+    50%{transform:scale(1.05);box-shadow:0 12px 40px rgba(44, 62, 80, 0.25)}
+    100%{transform:scale(1);box-shadow:var(--shadow-lg)}
+  }
+
+  /* HEADER */
+  header.site-header{
+    background:rgba(255,255,255,0.95);backdrop-filter:blur(12px);
+    border-bottom:1px solid var(--neutral-200);position:sticky;top:0;z-index:80;
+    box-shadow:var(--shadow-sm);
+  }
+  .header-inner{
+    max-width:1400px;margin:0 auto;padding:16px 24px;
+    display:flex;align-items:center;justify-content:space-between;gap:16px;
+  }
+  .brand{display:flex;align-items:center;gap:16px}
+  .brand .logo-thumb{
+    width:48px;height:48px;border-radius:12px;
+    background:linear-gradient(135deg,var(--primary-dark),var(--primary-medium));
+    display:flex;align-items:center;justify-content:center;
+    box-shadow:var(--shadow-sm);overflow:hidden;
+  }
+  .brand .logo-thumb img{width:70%;height:70%;object-fit:contain;filter:brightness(0) invert(1)}
+  .brand .logo-thumb .fallback{color:#fff;font-weight:700;font-size:20px;display:none}
+  .brand .title{font-weight:700;color:var(--primary-dark);font-size:20px;letter-spacing:-0.5px}
+  .brand .subtitle{font-size:13px;color:var(--neutral-500);font-weight:500}
+  
+  .header-right{display:flex;align-items:center;gap:16px}
+  .signin-text{
+    font-size:14px;color:var(--neutral-600);font-weight:500;
+    cursor:pointer;transition:all 0.2s ease;
+    padding:8px 12px;border-radius:8px;
+  }
+  .signin-text:hover{color:var(--primary-dark);background:var(--neutral-100)}
+  .profile-icon{
+    width:44px;height:44px;border-radius:50%;
+    background:linear-gradient(135deg, var(--neutral-100), var(--neutral-200));
+    border:2px solid var(--neutral-300);display:flex;align-items:center;
+    justify-content:center;cursor:pointer;overflow:hidden;
+    transition:all 0.3s ease;box-shadow:var(--shadow-sm);
+    font-weight:600;color:var(--neutral-600);
+  }
+  .profile-icon:hover{
+    transform:translateY(-2px);box-shadow:var(--shadow-md);
+    border-color:var(--primary-light);
+  }
+  .profile-icon img{width:100%;height:100%;object-fit:cover;display:block}
+
+  /* ADMIN NAVIGATION */
+  .admin-nav{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+  .nav-link{
+    color:var(--neutral-600);font-weight:500;padding:10px 16px;
+    border-radius:10px;transition:all 0.2s;position:relative;
+    border:1px solid transparent;
+  }
+  .nav-link:hover{background:var(--neutral-100);color:var(--primary-dark)}
+  .nav-link.active{
+    background:var(--primary-dark);color:#fff;box-shadow:var(--shadow-sm);
+  }
+  .nav-badge{
+    position:absolute;top:-4px;right:-4px;background:var(--accent-danger);
+    color:#fff;font-size:10px;padding:2px 6px;border-radius:10px;
+    font-weight:600;min-width:18px;text-align:center;
+  }
+
+  /* MAIN */
+  main.container{max-width:1400px;margin:24px auto;padding:0 24px}
+
+  /* UNIFIED LOGIN SCREEN */
+  .unified-login{
+    min-height:80vh;display:flex;align-items:center;justify-content:center;
+    padding:40px 20px;
+  }
+  .unified-login-card{
+    background:var(--bg-card);padding:48px;border-radius:16px;
+    box-shadow:var(--shadow-lg);max-width:520px;width:100%;
+    border:1px solid var(--neutral-200);
+  }
+  .unified-login-title{
+    font-size:32px;color:var(--primary-dark);font-weight:700;
+    margin-bottom:8px;text-align:center;letter-spacing:-0.5px;
+  }
+  .unified-login-subtitle{
+    color:var(--neutral-500);text-align:center;margin-bottom:32px;
+    line-height:1.6;font-size:16px;
+  }
+  
+  .login-type-tabs{
+    display:flex;gap:4px;margin-bottom:32px;background:var(--neutral-100);
+    padding:4px;border-radius:12px;
+  }
+  .login-type-tab{
+    flex:1;padding:14px 20px;text-align:center;border-radius:8px;
+    cursor:pointer;font-weight:500;transition:all 0.3s ease;
+    color:var(--neutral-600);background:transparent;font-size:14px;
+  }
+  .login-type-tab.active{
+    background:var(--bg-card);color:var(--primary-dark);
+    box-shadow:var(--shadow-sm);font-weight:600;
+  }
+
+  /* LANDING PAGE STYLES */
+  .about-card{
+    background:var(--bg-card);padding:40px;border-radius:16px;
+    box-shadow:var(--shadow-md);margin-bottom:32px;
+    border:1px solid var(--neutral-200);
+  }
+  .page-title{
+    font-size:40px;color:var(--primary-dark);font-weight:700;
+    margin-bottom:16px;letter-spacing:-1px;
+  }
+  .page-sub{
+    color:var(--neutral-600);margin-bottom:24px;line-height:1.7;
+    font-size:18px;max-width:800px;
+  }
+
+  .gallery-wrap{
+    margin-top:16px;border-radius:16px;overflow:hidden;
+    border:1px solid var(--neutral-200);background:var(--bg-card);
+    box-shadow:var(--shadow-sm);position:relative;
+  }
+  .gallery{
+    height:400px;display:flex;align-items:center;justify-content:center;
+    background:linear-gradient(135deg, var(--neutral-50), var(--neutral-100));
+    position:relative;transition:all 0.5s ease;cursor:pointer;
+    overflow:hidden;
+  }
+  .gallery img{
+    width:100%;height:400px;object-fit:cover;display:block;
+    transition:transform 0.5s ease;
+  }
+  .gallery:hover img{transform:scale(1.08)}
+  .gallery .placeholder{
+    display:flex;align-items:center;justify-content:center;
+    width:100%;height:100%;color:var(--neutral-500);font-weight:500;
+  }
+  .gallery .caption{
+    position:absolute;left:24px;bottom:20px;
+    background:rgba(255,255,255,0.95);backdrop-filter:blur(10px);
+    padding:12px 20px;border-radius:12px;color:var(--primary-dark);
+    font-weight:600;box-shadow:var(--shadow-sm);
+    transition:all 0.3s ease;
+  }
+  .gallery:hover .caption{
+    background:rgba(255,255,255,0.98);
+    transform:translateY(-4px);
+  }
+
+  /* CLIENT DASHBOARD - SIMPLIFIED */
+  .client-dashboard{display:none}
+  .welcome-section{
+    background:linear-gradient(135deg, var(--primary-dark), var(--primary-medium));
+    color:#fff;padding:40px;border-radius:16px;margin-bottom:32px;
+    box-shadow:var(--shadow-md);
+  }
+  .welcome-title{font-size:32px;font-weight:700;margin-bottom:12px}
+  .welcome-desc{font-size:16px;opacity:0.9;line-height:1.6}
+
+  .action-cards{
+    display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));
+    gap:24px;margin-bottom:32px;
+  }
+  .action-card{
+    background:var(--bg-card);padding:32px;border-radius:16px;
+    border:1px solid var(--neutral-200);box-shadow:var(--shadow-sm);
+    transition:all 0.3s ease;cursor:pointer;
+  }
+  .action-card:hover{
+    transform:translateY(-4px);box-shadow:var(--shadow-md);
+    border-color:var(--primary-light);
+  }
+  .action-icon{
+    width:60px;height:60px;border-radius:12px;
+    background:linear-gradient(135deg,var(--primary-dark),var(--primary-medium));
+    display:flex;align-items:center;justify-content:center;
+    color:#fff;font-size:24px;margin-bottom:20px;
+  }
+  .action-title{
+    font-size:20px;color:var(--primary-dark);font-weight:600;margin-bottom:8px;
+  }
+  .action-desc{
+    color:var(--neutral-600);font-size:14px;line-height:1.5;
+  }
+
+  /* ADMIN PORTAL STYLES */
+  .admin-dashboard{display:none}
+  .dashboard-header{margin-bottom:40px}
+  .dashboard-title{
+    font-size:32px;color:var(--primary-dark);font-weight:700;
+    margin-bottom:8px;letter-spacing:-0.5px;
+  }
+  .dashboard-subtitle{color:var(--neutral-500);font-size:16px}
+
+  .stats-grid{
+    display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));
+    gap:24px;margin-bottom:40px;
+  }
+  .stat-card{
+    background:var(--bg-card);padding:28px;border-radius:16px;
+    border:1px solid var(--neutral-200);box-shadow:var(--shadow-sm);
+    position:relative;overflow:hidden;transition:transform 0.2s ease;
+  }
+  .stat-card:hover{transform:translateY(-2px);box-shadow:var(--shadow-md)}
+  .stat-card::before{
+    content:'';position:absolute;top:0;left:0;right:0;height:4px;
+  }
+  .stat-card.new::before{background:var(--accent-success)}
+  .stat-card.validated::before{background:var(--accent-blue)}
+  .stat-card.progress::before{background:var(--accent-warning)}
+  .stat-card.resolved::before{background:var(--primary-medium)}
+  .stat-card.rejected::before{background:var(--accent-danger)}
+  
+  .stat-number{
+    font-size:36px;font-weight:700;color:var(--primary-dark);
+    display:block;margin-bottom:8px;
+  }
+  .stat-label{color:var(--neutral-500);font-weight:500;font-size:14px}
+  .stat-change{
+    font-size:12px;margin-top:12px;padding:4px 12px;
+    border-radius:12px;font-weight:500;
+  }
+  .stat-change.up{background:rgba(39, 174, 96, 0.1);color:var(--accent-success)}
+
+  /* ISSUES SECTION */
+  .issues-section{margin-top:40px}
+  .section-header{
+    display:flex;justify-content:space-between;align-items:center;
+    margin-bottom:24px;flex-wrap:wrap;gap:16px;
+  }
+  .section-title{
+    font-size:28px;color:var(--primary-dark);font-weight:700;margin:0;
+  }
+
+  .controls-bar{
+    display:flex;justify-content:space-between;align-items:center;
+    margin-bottom:24px;gap:16px;flex-wrap:wrap;
+  }
+  .filter-tabs{display:flex;gap:8px;flex-wrap:wrap}
+  .filter-tab{
+    padding:10px 16px;border-radius:24px;
+    border:1px solid var(--neutral-300);background:var(--bg-card);
+    color:var(--neutral-600);font-weight:500;cursor:pointer;
+    transition:all 0.3s ease;font-size:13px;
+  }
+  .filter-tab:hover{border-color:var(--primary-light)}
+  .filter-tab.active{
+    background:var(--primary-dark);color:#fff;
+    border-color:var(--primary-dark);box-shadow:var(--shadow-sm);
+  }
+
+  .issues-grid{
+    display:grid;grid-template-columns:repeat(auto-fill,minmax(400px,1fr));
+    gap:24px;
+  }
+  .issue-card{
+    background:var(--bg-card);border-radius:16px;
+    border:1px solid var(--neutral-200);overflow:hidden;
+    box-shadow:var(--shadow-sm);position:relative;
+    transition:all 0.3s ease;
+  }
+  .issue-card:hover{
+    transform:translateY(-3px);box-shadow:var(--shadow-md);
+    border-color:var(--neutral-300);
+  }
+  
+  .issue-header{
+    padding:20px 24px;border-bottom:1px solid var(--neutral-200);
+    display:flex;justify-content:space-between;align-items:flex-start;gap:12px;
+  }
+  .issue-id{
+    font-size:12px;color:var(--neutral-500);font-weight:500;
+    background:var(--neutral-100);padding:4px 8px;border-radius:6px;
+  }
+  .issue-priority{
+    padding:6px 12px;border-radius:16px;font-size:11px;
+    font-weight:600;color:#fff;text-transform:uppercase;
+  }
+  .issue-priority.high{background:var(--accent-danger)}
+  .issue-priority.medium{background:var(--accent-warning)}
+  .issue-priority.low{background:var(--accent-success)}
+  
+  .issue-body{padding:24px}
+  .issue-title{
+    font-weight:600;color:var(--primary-dark);margin-bottom:12px;
+    font-size:18px;line-height:1.4;
+  }
+  .issue-desc{
+    color:var(--neutral-600);margin-bottom:16px;line-height:1.5;
+    font-size:14px;
+  }
+  .issue-location{
+    font-size:13px;color:var(--accent-blue);font-weight:500;
+    margin-bottom:16px;
+  }
+  
+  .issue-meta{
+    display:grid;grid-template-columns:1fr 1fr;gap:12px;
+    margin-bottom:20px;font-size:12px;color:var(--neutral-500);
+  }
+  .issue-meta > div{display:flex;align-items:center;gap:6px}
+  .issue-meta strong{color:var(--primary-dark);font-weight:500}
+  
+  .issue-citizen{
+    background:var(--neutral-50);padding:16px;border-radius:12px;
+    margin-bottom:20px;border:1px solid var(--neutral-200);
+  }
+  .citizen-name{
+    font-weight:600;color:var(--primary-dark);margin-bottom:4px;
+  }
+  .citizen-contact{font-size:12px;color:var(--neutral-500)}
+  
+  .issue-image{
+    width:100%;height:140px;background:var(--neutral-100);
+    border-radius:12px;margin-bottom:20px;overflow:hidden;
+    border:1px solid var(--neutral-200);
+  }
+  .issue-image img{width:100%;height:100%;object-fit:cover}
+  .no-image{
+    display:flex;align-items:center;justify-content:center;
+    color:var(--neutral-500);font-size:12px;font-weight:500;
+  }
+  
+  .issue-actions{display:flex;gap:8px;flex-wrap:wrap}
+  .btn-action{
+    padding:10px 16px;border-radius:8px;border:none;cursor:pointer;
+    font-weight:500;transition:all 0.2s;font-size:12px;
+    text-decoration:none;display:inline-flex;align-items:center;gap:6px;
+  }
+  .btn-primary{
+    background:var(--primary-dark);color:#fff;
+  }
+  .btn-primary:hover{
+    background:var(--primary-medium);transform:translateY(-1px);
+  }
+  .btn-secondary{
+    background:var(--neutral-100);border:1px solid var(--neutral-300);
+    color:var(--neutral-700);
+  }
+  .btn-secondary:hover{background:var(--neutral-200)}
+
+  .status-badge{
+    position:absolute;top:16px;right:16px;padding:6px 12px;
+    border-radius:16px;font-weight:500;font-size:11px;color:#fff;
+  }
+  .status-badge.new{background:var(--accent-success)}
+  .status-badge.validated{background:var(--accent-blue)}
+  .status-badge.progress{background:var(--accent-warning)}
+  .status-badge.resolved{background:var(--primary-medium)}
+  .status-badge.rejected{background:var(--accent-danger)}
+
+  /* SHARED MODALS */
+  .modal{
+    position:fixed;inset:0;display:none;align-items:center;
+    justify-content:center;background:rgba(13, 17, 23, 0.5);
+    backdrop-filter:blur(4px);z-index:9999;padding:20px;
+    animation:fadeIn 0.3s ease;
+  }
+  .modal.open{display:flex}
+  @keyframes fadeIn{from{opacity:0}to{opacity:1}}
+  .modal-card{
+    width:100%;background:var(--bg-card);border-radius:16px;
+    padding:0;box-shadow:var(--shadow-lg);
+    animation:slideIn 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+    overflow:hidden;max-height:90vh;overflow-y:auto;
+    border:1px solid var(--neutral-200);
+  }
+  @keyframes slideIn{
+    from{transform:translateY(40px);opacity:0}
+    to{transform:translateY(0);opacity:1}
+  }
+  
+  .modal-head{
+    display:flex;justify-content:space-between;align-items:center;
+    padding:24px 32px;background:var(--primary-dark);color:#fff;
+  }
+  .modal-head h3{font-size:20px;font-weight:600;margin:0}
+  .close-btn{
+    background:rgba(255,255,255,0.15);border:none;color:#fff;
+    padding:8px 16px;border-radius:8px;cursor:pointer;
+    font-weight:500;transition:all 0.2s ease;
+  }
+  .close-btn:hover{background:rgba(255,255,255,0.25)}
+  
+  .modal-body{padding:32px}
+  .form-grid{
+    display:grid;grid-template-columns:1fr 1fr;gap:20px;margin-bottom:20px;
+  }
+  @media (max-width:640px){.form-grid{grid-template-columns:1fr}}
+  
+  .form-group{margin-bottom:24px}
+  .form-group.full-width{grid-column:1/-1}
+  label{
+    display:block;font-size:14px;color:var(--primary-dark);
+    margin-bottom:8px;font-weight:500;
+  }
+  input[type=text], input[type=email], input[type=password], textarea, select{
+    width:100%;padding:16px 20px;border-radius:12px;
+    border:1px solid var(--neutral-300);background:var(--bg-card);
+    transition:all 0.3s ease;font-size:14px;font-family:inherit;
+  }
+  input:focus, textarea:focus, select:focus{
+    outline:none;border-color:var(--primary-light);
+    box-shadow:0 0 0 3px rgba(52, 152, 219, 0.1);
+  }
+  textarea{min-height:100px;resize:vertical}
+  
+  .form-actions{
+    display:flex;gap:12px;justify-content:flex-end;margin-top:32px;
+    padding-top:24px;border-top:1px solid var(--neutral-200);
+  }
+  .btn-ghost{
+    background:transparent;border:1px solid var(--neutral-300);
+    padding:12px 24px;border-radius:10px;cursor:pointer;
+    color:var(--neutral-600);font-weight:500;transition:all 0.3s ease;
+  }
+  .btn-ghost:hover{background:var(--neutral-100);border-color:var(--neutral-400)}
+
+  /* EMAIL VERIFICATION */
+  .verification-section{
+    background:var(--neutral-50);padding:20px;border-radius:12px;
+    margin-bottom:20px;border:1px solid var(--neutral-200);
+  }
+  .verification-input-group{display:flex;gap:12px;margin-top:12px}
+  .verification-code{
+    flex:1;text-align:center;font-size:18px;font-weight:600;
+    letter-spacing:2px;
+  }
+  .verify-btn{
+    background:var(--accent-blue);color:#fff;border:none;
+    padding:12px 20px;border-radius:8px;font-weight:500;
+    cursor:pointer;transition:all 0.2s;
+  }
+  .verify-btn:hover{background:#2980b9}
+  .verify-btn:disabled{
+    background:var(--neutral-400);cursor:not-allowed;
+  }
+
+  /* PROFILE PANELS */
+  .panel{
+    background:var(--bg-card);padding:40px;border-radius:16px;
+    box-shadow:var(--shadow-md);margin-top:24px;
+    border:1px solid var(--neutral-200);
+  }
+  .profile-header{
+    display:flex;gap:32px;align-items:flex-start;
+    margin-bottom:40px;flex-wrap:wrap;
+  }
+  .profile-avatar{
+    width:120px;height:120px;border-radius:20px;
+    background:linear-gradient(135deg,var(--primary-dark),var(--primary-medium));
+    display:flex;align-items:center;justify-content:center;
+    color:#fff;font-weight:600;font-size:48px;
+    box-shadow:var(--shadow-md);flex-shrink:0;
+  }
+  .profile-info{flex:1;min-width:320px}
+  .profile-name{
+    font-size:36px;font-weight:700;color:var(--primary-dark);
+    margin-bottom:16px;letter-spacing:-0.5px;
+  }
+  .profile-field{
+    display:flex;align-items:center;gap:16px;margin-bottom:12px;
+    padding:12px 0;border-bottom:1px solid var(--neutral-100);
+  }
+  .profile-field-label{
+    font-weight:500;color:var(--primary-dark);min-width:100px;
+  }
+  .profile-field-value{color:var(--neutral-600);font-weight:400}
+
+  /* LOADING AND EMPTY STATES */
+  .loading{
+    display:none;text-align:center;padding:60px;color:var(--neutral-500);
+  }
+  .spinner{
+    width:40px;height:40px;border:3px solid var(--neutral-300);
+    border-top:3px solid var(--primary-dark);border-radius:50%;
+    animation:spin 1s linear infinite;margin:0 auto 20px;
+  }
+  @keyframes spin{0%{transform:rotate(0deg)}100%{transform:rotate(360deg)}}
+  
+  .empty-state{text-align:center;padding:80px 20px;color:var(--neutral-500)}
+  .empty-state-icon{font-size:64px;margin-bottom:24px;opacity:0.6}
+  .empty-state h3{
+    color:var(--primary-dark);margin-bottom:12px;font-weight:600;
+    font-size:20px;
+  }
+
+  /* NOTIFICATION STYLES */
+  .notification{
+    position:fixed;top:100px;right:20px;padding:16px 24px;
+    border-radius:12px;color:#fff;font-weight:500;z-index:10000;
+    transform:translateX(400px);transition:transform 0.3s ease;
+    box-shadow:var(--shadow-md);
+  }
+  .notification.show{transform:translateX(0)}
+  .notification.error{background:var(--accent-danger)}
+  .notification.success{background:var(--accent-success)}
+  .notification.warning{background:var(--accent-warning)}
+
+  /* UTILITIES */
+  .sr-only{
+    position:absolute;width:1px;height:1px;padding:0;margin:-1px;
+    overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0;
+  }
+  .hidden{display:none!important}
+
+  /* RESPONSIVE */
+  @media (max-width:880px){
+    .issues-grid{grid-template-columns:1fr}
+    .stats-grid{grid-template-columns:repeat(2,1fr)}
+    .admin-nav{justify-content:center;gap:8px}
+    .action-cards{grid-template-columns:1fr}
+  }
+  
+  @media (max-width:640px){
+    .header-inner{padding:12px 16px}
+    main.container{padding:0 16px;margin:16px auto}
+    .about-card{padding:24px}
+    .modal-body{padding:24px}
+    .profile-header{flex-direction:column;text-align:center}
+  }
+</style>
+</head>
+<body>
+
+  <!-- SPLASH -->
+  <div id="splash">
+    <div class="splash-logo">
+      <img src="/images/civicfixlogo.png" alt="CivicFix Logo" onerror="this.style.display='none';this.nextElementSibling.style.display='block'">
+      <span class="fallback">CF</span>
+    </div>
+    <div class="splash-sub">CivicFix – Professional Community Portal</div>
+  </div>
+
+  <!-- HEADER -->
+  <header class="site-header" role="banner">
+    <div class="header-inner">
+      <div class="brand">
+        <div class="logo-thumb">
+          <img src="/images/civicfixlogo.png" alt="CivicFix Logo" onerror="this.style.display='none';this.nextElementSibling.style.display='block'">
+          <span class="fallback">CF</span>
+        </div>
+        <div>
+          <div class="title" id="brandTitle">CivicFix</div>
+          <div class="subtitle" id="brandSubtitle">Community Portal</div>
+        </div>
+      </div>
+
+      <div class="header-right" id="headerRight">
+        <div class="signin-text" id="signinText">Sign Up / Login</div>
+        <button class="profile-icon" id="profileTrigger" title="Sign Up / Login" aria-label="Open sign up or login form">
+          <img id="profileImage" src="" alt="profile" onerror="this.style.display='none'">
+          <span id="profileInitial">?</span>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <!-- MAIN -->
+  <main class="container" role="main">
+    
+    <!-- UNIFIED LOGIN SCREEN -->
+    <section id="unifiedLogin" class="unified-login" style="display:none">
+      <div class="unified-login-card">
+        <h1 class="unified-login-title">CivicFix Portal</h1>
+        <p class="unified-login-subtitle">Access the professional community platform for citizens and municipal administrators</p>
+        
+        <div class="login-type-tabs">
+          <div class="login-type-tab active" data-type="citizen">
+            👤 Citizen Login
+          </div>
+          <div class="login-type-tab" data-type="admin">
+            🏛️ Admin Login
+          </div>
+        </div>
+        
+        <!-- CITIZEN LOGIN FORM -->
+        <form id="citizenLoginForm" style="display:block">
+          <div class="form-group">
+            <label for="citizen_email">Email Address</label>
+            <input type="email" id="citizen_email" placeholder="Enter your email address" required>
+          </div>
+          
+          <div class="form-group">
+            <label for="citizen_password">Password</label>
+            <input type="password" id="citizen_password" placeholder="Enter password" required>
+          </div>
+          
+          <div class="form-actions">
+            <button type="submit" class="btn-primary" style="width:100%;padding:16px;font-size:16px">Login as Citizen</button>
+          </div>
+          
+          <div style="text-align:center;margin-top:20px">
+            <span style="color:var(--neutral-500);font-size:14px">Don't have an account? </span>
+            <button type="button" id="showSignupBtn" class="btn-ghost" style="padding:4px 12px;font-size:14px">Sign Up</button>
+          </div>
+        </form>
+
+        <!-- ADMIN LOGIN FORM -->
+        <form id="adminLoginForm" style="display:none">
+          <div class="form-group">
+            <label for="admin_workerID">Worker ID</label>
+            <input type="text" id="admin_workerID" required placeholder="Enter your worker ID" value="admin001">
+          </div>
+          
+          <div class="form-group">
+            <label for="admin_department">Department</label>
+            <select id="admin_department" required>
+              <option value="">Select Department</option>
+              <option value="Roads & Pavements">Roads & Pavements</option>
+              <option value="Electrical / Street Lighting">Electrical / Street Lighting</option>
+              <option value="Sanitation">Sanitation</option>
+              <option value="Parks & Recreation">Parks & Recreation</option>
+              <option value="Urban Planning">Urban Planning</option>
+              <option value="Traffic Management">Traffic Management</option>
+              <option value="Water & Sewage">Water & Sewage</option>
+              <option value="Administration">Administration</option>
+            </select>
+          </div>
+          
+          <div class="form-group">
+            <label for="admin_password">Password</label>
+            <input type="password" id="admin_password" required placeholder="Enter password" value="admin123">
+          </div>
+          
+          <div class="form-actions">
+            <button type="submit" class="btn-primary" style="width:100%;padding:16px;font-size:16px">Login to Admin Portal</button>
+          </div>
+          
+          <div style="text-align:center;margin-top:20px;font-size:12px;color:var(--neutral-500)">
+            Demo Credentials: Worker ID: <strong>admin001</strong>, Password: <strong>admin123</strong>
+          </div>
+        </form>
+      </div>
+    </section>
+
+    <!-- LANDING PAGE VIEW -->
+    <section id="landingView" class="about-card">
+      <h1 class="page-title">CivicFix</h1>
+      <p class="page-sub">CivicFix is a professional citizen-first platform designed to make our cities cleaner, safer, and more efficient. Our comprehensive solution enables seamless communication between citizens and municipal authorities, ensuring transparency and accountability in community issue resolution.</p>
+      
+      <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:24px;margin:32px 0">
+        <div style="background:var(--neutral-50);padding:24px;border-radius:12px;border:1px solid var(--neutral-200)">
+          <h3 style="color:var(--primary-dark);margin-bottom:12px;font-weight:600">🎯 Smart Reporting</h3>
+          <p style="color:var(--neutral-600);font-size:14px;line-height:1.6">Report civic issues with photos, videos, and GPS location data. Our AI automatically categorizes and routes complaints to the appropriate departments.</p>
+        </div>
+        <div style="background:var(--neutral-50);padding:24px;border-radius:12px;border:1px solid var(--neutral-200)">
+          <h3 style="color:var(--primary-dark);margin-bottom:12px;font-weight:600">🤝 Collaborative Platform</h3>
+          <p style="color:var(--neutral-600);font-size:14px;line-height:1.6">Citizens can collaborate to avoid duplicate reports, verify issues, and track progress together for maximum community impact.</p>
+        </div>
+        <div style="background:var(--neutral-50);padding:24px;border-radius:12px;border:1px solid var(--neutral-200)">
+          <h3 style="color:var(--primary-dark);margin-bottom:12px;font-weight:600">📊 Real-time Tracking</h3>
+          <p style="color:var(--neutral-600);font-size:14px;line-height:1.6">Get instant status updates and notifications when issues are resolved. Complete transparency from report to resolution.</p>
+        </div>
+      </div>
+      
+      <p style="color:var(--neutral-500);font-size:14px;font-style:italic;margin-top:24px">Building smarter, responsive, and sustainable cities through technology-driven civic engagement.</p>
+    </section>
+
+    <!-- GALLERY -->
+    <section class="gallery-wrap" id="galleryWrap" aria-live="polite">
+      <div id="gallery" class="gallery" role="img" aria-label="Project gallery">
+        <img id="galleryImg" src="/images/1.png" alt="Community initiatives" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'">
+        <div class="placeholder" style="display:none">Professional Gallery - Community Initiatives</div>
+        <div class="caption" id="galleryCaption">Community Initiatives & Improvements</div>
+      </div>
+    </section>
+
+    <!-- CLIENT DASHBOARD -->
+    <section id="clientDashboard" class="client-dashboard">
+      <div class="welcome-section">
+        <h1 class="welcome-title">Welcome to CivicFix</h1>
+        <p class="welcome-desc">Your comprehensive platform for community engagement and civic issue resolution. Work together with your local government to build better neighborhoods.</p>
+      </div>
+
+      <div class="action-cards">
+        <div class="action-card" id="reportNewIssue">
+          <div class="action-icon">📝</div>
+          <div class="action-title">Report New Issue</div>
+          <div class="action-desc">Submit a new community issue with detailed information and supporting evidence.</div>
+        </div>
+        <div class="action-card" id="viewMyProfile">
+          <div class="action-icon">👤</div>
+          <div class="action-title">My Profile</div>
+          <div class="action-desc">Manage your account settings and view your submission history.</div>
+        </div>
+        <div class="action-card" id="contactSupport">
+          <div class="action-icon">💬</div>
+          <div class="action-title">Contact Support</div>
+          <div class="action-desc">Get help with technical issues or questions about the platform.</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ADMIN DASHBOARD -->
+    <section id="adminDashboard" class="admin-dashboard">
+      <div class="dashboard-header">
+        <h1 class="dashboard-title">Municipal Dashboard</h1>
+        <p class="dashboard-subtitle" id="dashboardSubtitle">Managing community issues for all departments</p>
+      </div>
+
+      <!-- STATS OVERVIEW -->
+      <div class="stats-grid">
+        <div class="stat-card new">
+          <span class="stat-number" id="statNew">0</span>
+          <div class="stat-label">New Issues</div>
+          <div class="stat-change up">+12% from last week</div>
+        </div>
+        <div class="stat-card validated">
+          <span class="stat-number" id="statValidated">0</span>
+          <div class="stat-label">Validated</div>
+          <div class="stat-change up">+8% from last week</div>
+        </div>
+        <div class="stat-card progress">
+          <span class="stat-number" id="statProgress">0</span>
+          <div class="stat-label">In Progress</div>
+          <div class="stat-change up">-3% from last week</div>
+        </div>
+        <div class="stat-card resolved">
+          <span class="stat-number" id="statResolved">0</span>
+          <div class="stat-label">Resolved</div>
+          <div class="stat-change up">+15% from last week</div>
+        </div>
+        <div class="stat-card rejected">
+          <span class="stat-number" id="statRejected">0</span>
+          <div class="stat-label">Rejected</div>
+          <div class="stat-change up">-5% from last week</div>
+        </div>
+      </div>
+
+      <!-- ISSUES MANAGEMENT -->
+      <div class="issues-section">
+        <div class="section-header">
+          <h2 class="section-title">Community Issues Management</h2>
+          <div style="display:flex;gap:12px;align-items:center;flex-wrap:wrap">
+            <button id="refreshBtn" class="btn-primary">Refresh Dashboard</button>
+          </div>
+        </div>
+
+        <div class="controls-bar">
+          <div class="filter-tabs" id="adminFilterTabs">
+            <div class="filter-tab active" data-filter="all">All Issues <span id="countAll">0</span></div>
+            <div class="filter-tab" data-filter="new">New <span id="countNew">0</span></div>
+            <div class="filter-tab" data-filter="validated">Validated <span id="countValidated">0</span></div>
+            <div class="filter-tab" data-filter="progress">In Progress <span id="countProgress">0</span></div>
+            <div class="filter-tab" data-filter="resolved">Resolved <span id="countResolved">0</span></div>
+            <div class="filter-tab" data-filter="rejected">Rejected <span id="countRejected">0</span></div>
+          </div>
+        </div>
+
+        <div id="issuesGrid" class="issues-grid"></div>
+        
+        <div id="emptyState" class="empty-state" style="display:none">
+          <div class="empty-state-icon">📋</div>
+          <h3>No Issues Found</h3>
+          <p>No community issues match your current filter criteria.</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- PROFILE PANEL -->
+    <section id="profilePanel" class="panel" style="display:none">
+      <h2 style="color:var(--primary-dark);margin-bottom:32px;font-weight:700">My Profile</h2>
+      <div id="profileInfo"></div>
+    </section>
+
+    <!-- ADMIN PROFILE PANEL -->
+    <section id="adminProfile" class="panel" style="display:none">
+      <h2 style="color:var(--primary-dark);margin-bottom:32px;font-weight:700">Admin Profile</h2>
+      <div id="adminProfileInfo"></div>
+    </section>
+
+    <!-- OTHER PANELS -->
+    <section id="privacyPanel" class="panel" style="display:none">
+      <h2 style="color:var(--primary-dark);margin-bottom:20px;font-weight:700">Privacy Policy</h2>
+      <p style="color:var(--neutral-600);margin-top:12px;line-height:1.7">At CivicFix, we prioritize your privacy and data security. We are committed to protecting your personal information and maintaining transparency about how we collect, use, and safeguard your data.</p>
+    </section>
+
+    <section id="termsPanel" class="panel" style="display:none">
+      <h2 style="color:var(--primary-dark);margin-bottom:20px;font-weight:700">Terms & Conditions</h2>
+      <p style="color:var(--neutral-600);margin-top:12px;line-height:1.7">CivicFix is provided as a professional community platform. Users must submit accurate information when reporting issues. Misuse, false reporting, or violation of community guidelines may result in account restrictions.</p>
+    </section>
+
+    <section id="contactPanel" class="panel" style="display:none">
+      <h2 style="color:var(--primary-dark);margin-bottom:20px;font-weight:700">Contact Us</h2>
+      <div style="color:var(--neutral-600);margin-top:12px;line-height:1.7">
+        <p><strong>Email:</strong> support@civicfix.gov</p>
+        <p><strong>Phone:</strong> +91 1800-CIVIC-FIX</p>
+        <p><strong>Address:</strong> Municipal Technology Center<br>Smart City Initiative Office</p>
+      </div>
+    </section>
+  </main>
+
+  <!-- FOOTER -->
+  <footer class="site-foot" role="contentinfo" style="margin-top:60px;background:var(--bg-card);border-top:1px solid var(--neutral-200);box-shadow:var(--shadow-sm)">
+    <div class="foot-inner" style="max-width:1200px;margin:0 auto;padding:40px 24px;display:flex;justify-content:space-between;gap:32px;flex-wrap:wrap">
+      <div class="foot-col" style="min-width:200px">
+        <h4 style="color:var(--primary-dark);margin-bottom:16px;font-weight:600">CivicFix</h4>
+        <p style="color:var(--neutral-600);font-size:14px;line-height:1.6">Empowering communities through professional civic engagement technology. Building smarter, more responsive cities together.</p>
+      </div>
+      <div class="foot-col" style="min-width:200px">
+        <h4 style="color:var(--primary-dark);margin-bottom:16px;font-weight:600">Quick Links</h4>
+        <div style="display:flex;flex-direction:column;gap:8px">
+          <a href="#" id="ftHome" style="color:var(--neutral-600);cursor:pointer;font-weight:500;transition:color 0.2s ease">Home</a>
+          <a href="#" id="ftProfile" style="color:var(--neutral-600);cursor:pointer;font-weight:500;transition:color 0.2s ease">My Profile</a>
+        </div>
+      </div>
+      <div class="foot-col" style="min-width:200px">
+        <h4 style="color:var(--primary-dark);margin-bottom:16px;font-weight:600">Legal</h4>
+        <div style="display:flex;flex-direction:column;gap:8px">
+          <a href="#" id="ftPrivacy" style="color:var(--neutral-600);cursor:pointer;font-weight:500;transition:color 0.2s ease">Privacy Policy</a>
+          <a href="#" id="ftTerms" style="color:var(--neutral-600);cursor:pointer;font-weight:500;transition:color 0.2s ease">Terms of Service</a>
+          <a href="#" id="ftContact" style="color:var(--neutral-600);cursor:pointer;font-weight:500;transition:color 0.2s ease">Contact Us</a>
+        </div>
+      </div>
+    </div>
+  </footer>
+
+  <!-- Notification container -->
+  <div id="notificationContainer" aria-live="assertive"></div>
+
+  <!-- CITIZEN SIGNUP MODAL -->
+  <div class="modal" id="signupModal" aria-hidden="true" role="dialog" aria-labelledby="signupModalTitle">
+    <div class="modal-card" role="document">
+      <div class="modal-head">
+        <h3 id="signupModalTitle">Create Account</h3>
+        <button id="signupClose" class="close-btn" aria-label="Close dialog">Close</button>
+      </div>
+
+      <div class="modal-body">
+        <form id="signupForm" autocomplete="off" novalidate>
+          <div class="form-grid">
+            <div class="form-group">
+              <label for="su_name">Full Name *</label>
+              <input type="text" id="su_name" required placeholder="Your full name">
+              <div class="error" id="su_name_error" role="alert"></div>
+            </div>
+            <div class="form-group">
+              <label for="su_mobile">Mobile Number</label>
+              <input type="tel" id="su_mobile" placeholder="10-digit mobile number">
+              <div class="error" id="su_mobile_error" role="alert"></div>
+            </div>
+          </div>
+          
+          <div class="form-group full-width">
+            <label for="su_email">Email Address *</label>
+            <input type="email" id="su_email" required placeholder="name@example.com">
+            <div class="error" id="su_email_error" role="alert"></div>
+            
+            <!-- EMAIL VERIFICATION SECTION -->
+            <div class="verification-section" id="emailVerificationSection" style="display:none">
+              <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px">
+                <label style="margin:0;font-weight:600;color:var(--primary-dark)">Email Verification</label>
+                <button type="button" id="sendVerificationBtn" class="verify-btn" style="padding:6px 12px;font-size:12px">Send Code</button>
+              </div>
+              <p style="color:var(--neutral-600);font-size:13px;margin-bottom:12px">We'll send a verification code to your email address.</p>
+              <div class="verification-input-group">
+                <input type="text" id="verificationCode" class="verification-code" placeholder="Enter 6-digit code" maxlength="6">
+                <button type="button" id="verifyCodeBtn" class="verify-btn" disabled>Verify</button>
+              </div>
+              <div id="verificationStatus" style="margin-top:8px;font-size:12px"></div>
+            </div>
+          </div>
+
+          <div class="form-grid">
+            <div class="form-group">
+              <label for="su_state">State *</label>
+              <select id="su_state" required>
+                <option value="">Select your state</option>
+              </select>
+              <div class="error" id="su_state_error" role="alert"></div>
+            </div>
+            <div class="form-group">
+              <label for="su_address">Address</label>
+              <input type="text" id="su_address" placeholder="Your local address">
+            </div>
+          </div>
+
+          <div class="form-grid">
+            <div class="form-group">
+              <label for="su_password">Password *</label>
+              <input type="password" id="su_password" required placeholder="Create password (min 8 characters)">
+              <div class="error" id="su_password_error" role="alert"></div>
+            </div>
+            <div class="form-group">
+              <label for="su_confirm">Confirm Password *</label>
+              <input type="password" id="su_confirm" required placeholder="Confirm password">
+              <div class="error" id="pwdError" role="alert" style="display:none;color:var(--accent-danger);font-size:12px;margin-top:4px">Passwords do not match</div>
+            </div>
+          </div>
+
+          <div class="form-actions">
+            <button type="button" id="signupCancel" class="btn-ghost">Cancel</button>
+            <button type="submit" class="btn-primary">Create Account</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <!-- REPORT MODAL -->
+  <div class="modal compact-modal" id="reportModal" aria-hidden="true" role="dialog" aria-labelledby="reportModalTitle">
+    <div class="modal-card" style="max-width:600px">
+      <div class="modal-head">
+        <h3 id="reportModalTitle">Report Community Issue</h3>
+        <button id="reportClose" class="close-btn" aria-label="Close dialog">Close</button>
+      </div>
+
+      <div class="modal-body">
+        <form id="reportForm" autocomplete="off" novalidate>
+          <div class="form-grid">
+            <div class="form-group">
+              <label for="r_name">Full Name *</label>
+              <input type="text" id="r_name" required>
+              <div class="error" id="r_name_error" role="alert"></div>
+            </div>
+            <div class="form-group">
+              <label for="r_email">Email Address *</label>
+              <input type="email" id="r_email" required>
+              <div class="error" id="r_email_error" role="alert"></div>
+            </div>
+          </div>
+
+          <div class="form-group full-width">
+            <label for="r_mobile">Mobile Number</label>
+            <input type="tel" id="r_mobile" placeholder="Optional contact number">
+          </div>
+
+          <div class="form-group full-width">
+            <label for="r_title">Issue Title *</label>
+            <input type="text" id="r_title" required placeholder="Brief, descriptive title of the issue">
+            <div class="error" id="r_title_error" role="alert"></div>
+          </div>
+
+          <div class="form-group full-width">
+            <label for="r_details">Issue Description *</label>
+            <textarea id="r_details" required placeholder="Provide detailed information about the issue, including when you noticed it and how it affects the community..."></textarea>
+            <div class="error" id="r_details_error" role="alert"></div>
+          </div>
+
+          <div class="form-group full-width">
+            <label for="r_location">Location / Address *</label>
+            <input type="text" id="r_location" required placeholder="Exact location where the issue is occurring">
+            <div class="error" id="r_location_error" role="alert"></div>
+          </div>
+
+          <div class="photo-section" style="background:var(--neutral-50);padding:20px;border-radius:12px;border:2px dashed var(--neutral-300);margin:16px 0">
+            <div class="photo-controls" style="display:flex;gap:12px;align-items:center;flex-wrap:wrap;margin-bottom:16px">
+              <button type="button" id="openCamera" class="btn-primary" style="background:var(--primary-dark);color:#fff;border:none;padding:10px 16px;border-radius:8px;cursor:pointer;font-weight:500;transition:all 0.3s ease;font-size:13px">📷 Take Photo</button>
+              <label for="fileInput" class="btn-primary" style="background:var(--primary-dark);color:#fff;border:none;padding:10px 16px;border-radius:8px;cursor:pointer;font-weight:500;display:inline-block;font-size:13px">📁 Upload Image</label>
+              <input type="file" id="fileInput" accept="image/*" style="display:none" aria-label="Upload image file">
+            </div>
+
+            <div id="cameraStage" class="camera-stage" style="display:none;background:#000;border-radius:12px;overflow:hidden;margin-top:16px">
+              <div class="video-wrap" style="width:100%;height:240px;display:flex;align-items:center;justify-content:center;position:relative">
+                <video id="video" autoplay muted playsinline aria-label="Camera preview" style="width:100%;height:100%;object-fit:cover"></video>
+              </div>
+              <div class="camera-controls" style="padding:16px;background:rgba(0,0,0,0.8);display:flex;gap:12px;justify-content:center">
+                <button type="button" id="captureBtn" class="btn-primary" style="background:var(--primary-dark);color:#fff;border:none;padding:10px 16px;border-radius:8px;cursor:pointer;font-weight:500">Capture Photo</button>
+                <button type="button" id="stopCamera" class="btn-ghost">Close Camera</button>
+              </div>
+            </div>
+
+            <div class="preview-section" id="previewSection" style="display:none;grid-template-columns:1fr 1fr;gap:16px;margin-top:16px">
+              <div class="img-preview" style="border-radius:12px;overflow:hidden;background:var(--neutral-100);border:2px solid var(--neutral-200)">
+                <img id="capturedImage" src="" alt="captured preview" style="width:100%;height:120px;object-fit:cover;display:block">
+              </div>
+              <div class="img-preview" style="border-radius:12px;overflow:hidden;background:var(--neutral-100);border:2px solid var(--neutral-200)">
+                <img id="filePreview" src="" alt="uploaded preview" style="width:100%;height:120px;object-fit:cover;display:block">
+              </div>
+            </div>
+          </div>
+
+          <div class="form-actions">
+            <button type="button" id="reportCancel" class="btn-ghost">Cancel</button>
+            <button type="submit" class="btn-primary">Submit Issue Report</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <!-- STATUS MODAL -->
+  <div class="modal" id="statusModal" aria-hidden="true" role="dialog" aria-labelledby="statusModalTitle">
+    <div class="modal-card" style="max-width:800px">
+      <div class="modal-head">
+        <h3 id="statusModalTitle">Issue Status & Details</h3>
+        <button id="statusClose" class="close-btn" aria-label="Close dialog">Close</button>
+      </div>
+      <div class="modal-body">
+        <div id="statusContent"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ADMIN STATUS UPDATE MODAL -->
+  <div class="modal" id="adminStatusModal" aria-hidden="true">
+    <div class="modal-card" style="max-width:600px">
+      <div class="modal-head">
+        <h3>Update Issue Status</h3>
+        <button id="adminStatusModalClose" class="close-btn">Close</button>
+      </div>
+      <div class="modal-body">
+        <div id="adminStatusModalContent"></div>
+        <form id="statusUpdateForm">
+          <div class="form-group">
+            <label for="newStatus">Update Status</label>
+            <select id="newStatus" required>
+              <option value="">Select new status</option>
+              <option value="Validated">Validated</option>
+              <option value="In Progress">In Progress</option>
+              <option value="Resolved">Resolved</option>
+              <option value="Rejected">Rejected</option>
+            </select>
+          </div>
+          
+          <div class="form-group">
+            <label for="adminRemark">Admin Remark (Required)</label>
+            <textarea id="adminRemark" required placeholder="Add your professional remark about this status update..."></textarea>
+          </div>
+          
+          <div class="form-actions">
+            <button type="button" class="btn-ghost" id="statusCancel">Cancel</button>
+            <button type="submit" class="btn-primary">Update Status</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <!-- ISSUE DETAILS MODAL -->
+  <div class="modal" id="detailsModal" aria-hidden="true">
+    <div class="modal-card" style="max-width:800px">
+      <div class="modal-head">
+        <h3>Issue Details</h3>
+        <button id="detailsModalClose" class="close-btn">Close</button>
+      </div>
+      <div class="modal-body">
+        <div id="detailsModalContent"></div>
+      </div>
+    </div>
+  </div>
+
+<script>
+/* ---------- PROFESSIONAL UNIFIED DATA SYSTEM ---------- */
+
+// Enhanced States list for India
+const STATES = [
+  "Andhra Pradesh","Arunachal Pradesh","Assam","Bihar","Chhattisgarh","Goa","Gujarat","Haryana",
+  "Himachal Pradesh","Jharkhand","Karnataka","Kerala","Madhya Pradesh","Maharashtra","Manipur",
+  "Meghalaya","Mizoram","Nagaland","Odisha","Punjab","Rajasthan","Sikkim","Tamil Nadu","Telangana",
+  "Tripura","Uttar Pradesh","Uttarakhand","West Bengal",
+  "Andaman and Nicobar Islands","Chandigarh","Dadra and Nagar Haveli and Daman and Diu","Delhi (NCT)",
+  "Jammu and Kashmir","Ladakh","Lakshadweep","Puducherry"
+];
+
+const DEPARTMENTS = [
+  "Roads & Pavements","Electrical / Street Lighting","Sanitation","Parks & Recreation",
+  "Urban Planning","Traffic Management","Water & Sewage","Public Health","Building Permits"
+];
+
+// Professional demo data - community issues for admin management
+const demoIssues = [
+  { 
+    id:1001, 
+    title:"Major Pothole on MG Road Junction", 
+    desc:"Large pothole near the main bus stop causing vehicle damage and traffic delays. Multiple citizens have reported tire damage.", 
+    location:"MG Road Junction, Bengaluru, Karnataka", 
+    status:"In Progress", 
+    image:'1.png', 
+    datetime:Date.now()-86400000, 
+    dept:"Roads & Pavements", 
+    email:'citizen1@email.com',
+    reporter:"Rajesh Kumar",
+    contact:"9876543210",
+    priority:"high",
+    assignedTo:"worker001",
+    adminRemarks: [
+      {
+        date: Date.now()-3600000,
+        admin: "Municipal Engineer",
+        remark: "Issue validated and forwarded to road maintenance team. Work order issued. Expected completion: 3 working days.",
+        status: "Validated"
+      },
+      {
+        date: Date.now()-1800000,
+        admin: "Road Maintenance Supervisor",
+        remark: "Repair work initiated. Pothole filling in progress. Traffic diversion implemented for safety.",
+        status: "In Progress"
+      }
+    ]
+  },
+  { 
+    id:1002, 
+    title:"Non-functional Street Light at Nehru Park", 
+    desc:"Street light has been non-functional for over a week, creating safety concerns for evening walkers and pedestrians.", 
+    location:"Nehru Park Main Entrance, Lucknow, Uttar Pradesh", 
+    status:"New", 
+    image:'/images/2.png', 
+    datetime:Date.now()-7200000, 
+    dept:"Electrical / Street Lighting", 
+    email:'priya.sharma@email.com',
+    reporter:"Priya Sharma",
+    contact:"9123456789",
+    priority:"medium",
+    adminRemarks: []
+  },
+  { 
+    id:1003, 
+    title:"Vandalism at Central Park Entrance", 
+    desc:"Graffiti and damage to park signage at the main entrance. Affects the aesthetic appeal and community image.", 
+    location:"Central Park Main Gate, Jaipur, Rajasthan", 
+    status:"Resolved", 
+    image:'/images/3.png', 
+    datetime:Date.now()-3600000*6, 
+    dept:"Parks & Recreation", 
+    email:'amit.patel@email.com',
+    reporter:"Amit Patel",
+    contact:"9234567890",
+    priority:"low",
+    assignedTo:"worker003",
+    adminRemarks: [
+      {
+        date: Date.now()-7200000,
+        admin: "Park Maintenance Supervisor",
+        remark: "Issue verified during site inspection. Cleaning and restoration work scheduled for next morning.",
+        status: "Validated"
+      },
+      {
+        date: Date.now()-3600000,
+        admin: "Maintenance Team Lead",
+        remark: "Graffiti removed and signage restored. Anti-vandalism measures implemented including improved lighting.",
+        status: "Resolved"
+      }
+    ]
+  },
+  { 
+    id:1004, 
+    title:"Overflowing Waste Container", 
+    desc:"Public waste container at bus stop overflowing for several days, causing hygiene issues and foul odors.", 
+    location:"Marine Drive Bus Stop, Mumbai, Maharashtra", 
+    status:"Rejected", 
+    image:'', 
+    datetime:Date.now()-8640000, 
+    dept:"Sanitation", 
+    email:'sunita.yadav@email.com',
+    reporter:"Sunita Yadav",
+    contact:"9345678901",
+    priority:"medium",
+    adminRemarks: [
+      {
+        date: Date.now()-3600000*2,
+        admin: "Sanitation Officer",
+        remark: "After inspection, determined this container is on private property. Issue forwarded to building management for resolution.",
+        status: "Rejected"
+      }
+    ]
+  },
+  { 
+    id:1005, 
+    title:"Unauthorized Construction on Footpath", 
+    desc:"Temporary structures and vendor stalls blocking pedestrian walkway, forcing people to walk on the road.", 
+    location:"Ashram Road Commercial Area, Ahmedabad, Gujarat", 
+    status:"Validated", 
+    image:'', 
+    datetime:Date.now()-2000000, 
+    dept:"Urban Planning", 
+    email:'deepak.singh@email.com',
+    reporter:"Deepak Singh",
+    contact:"9456789012",
+    priority:"high",
+    adminRemarks: [
+      {
+        date: Date.now()-900000,
+        admin: "City Planning Officer",
+        remark: "Violation confirmed through site survey. Legal notices issued to encroachers. Removal scheduled within 48 hours as per municipal guidelines.",
+        status: "Validated"
+      }
+    ]
+  }
+];
+
+// Professional Data Manager
+class ProfessionalDataManager {
+  constructor() {
+    this.storage = this.getAvailableStorage();
+    this.data = this.loadData();
+  }
+
+  getAvailableStorage() {
+    try {
+      localStorage.setItem('test', 'test');
+      localStorage.removeItem('test');
+      return localStorage;
+    } catch (e) {
+      try {
+        sessionStorage.setItem('test', 'test');
+        sessionStorage.removeItem('test');
+        return sessionStorage;
+      } catch (e) {
+        return null; // fallback to memory
+      }
+    }
+  }
+
+  loadData() {
+    if (this.storage) {
+      try {
+        const stored = this.storage.getItem('civicfix_professional_data');
+        if (stored) {
+          return JSON.parse(stored);
+        }
+      } catch (e) {
+        console.warn('Failed to parse stored data, using defaults');
+      }
+    }
+    
+    return {
+      sessionData: null,
+      issuesData: [...demoIssues],
+      registeredUsers: [],
+      adminUsers: [
+        {
+          workerID: 'admin001',
+          name: 'Municipal Administrator',
+          department: 'Administration',
+          role: 'Senior Administrator',
+          email: 'admin@civicfix.gov.in',
+          phone: '+91 9876543210',
+          password: 'admin123'
+        }
+      ],
+      emailVerificationCodes: {}
+    };
+  }
+
+  saveData() {
+    if (this.storage) {
+      try {
+        this.storage.setItem('civicfix_professional_data', JSON.stringify(this.data));
+      } catch (e) {
+        console.warn('Failed to save data to storage');
+      }
+    }
+  }
+
+  // Session management
+  getSessionData() { return this.data.sessionData; }
+  setSessionData(sessionData) { 
+    this.data.sessionData = sessionData; 
+    this.saveData(); 
+  }
+
+  // Issue management
+  getIssues() { return this.data.issuesData; }
+  addIssue(issue) { 
+    this.data.issuesData.unshift(issue); 
+    this.saveData(); 
+  }
+  updateIssue(id, updates) {
+    const index = this.data.issuesData.findIndex(c => c.id === id);
+    if (index !== -1) {
+      this.data.issuesData[index] = { ...this.data.issuesData[index], ...updates };
+      this.saveData();
+      return this.data.issuesData[index];
+    }
+    return null;
+  }
+
+  // User management
+  getRegisteredUsers() { return this.data.registeredUsers; }
+  addUser(user) { 
+    this.data.registeredUsers.push(user); 
+    this.saveData(); 
+  }
+  findUser(email) {
+    return this.data.registeredUsers.find(u => u.email === email);
+  }
+
+  // Admin management
+  getAdminUsers() { return this.data.adminUsers; }
+  findAdmin(workerID) {
+    return this.data.adminUsers.find(a => a.workerID === workerID);
+  }
+
+  // Email verification
+  setVerificationCode(email, code) {
+    this.data.emailVerificationCodes[email] = { code, timestamp: Date.now() };
+    this.saveData();
+  }
+  
+  getVerificationCode(email) {
+    const stored = this.data.emailVerificationCodes[email];
+    if (stored && (Date.now() - stored.timestamp < 600000)) { // 10 minutes
+      return stored.code;
+    }
+    return null;
+  }
+}
+
+// Initialize data manager
+const dataManager = new ProfessionalDataManager();
+
+/* ---------- GLOBAL VARIABLES ---------- */
+let currentUserType = null; // 'citizen' or 'admin'
+let currentUser = null;
+let currentAdminFilter = 'all';
+let galleryImages = ['/images/1.png', '/images/2.png', '/images/3.png'];
+let currentGalleryIndex = 0;
+
+/* ---------- DOM ELEMENTS ---------- */
+const splash = document.getElementById('splash');
+const unifiedLogin = document.getElementById('unifiedLogin');
+const landingView = document.getElementById('landingView');
+const galleryWrap = document.getElementById('galleryWrap');
+const clientDashboard = document.getElementById('clientDashboard');
+const adminDashboard = document.getElementById('adminDashboard');
+const profilePanel = document.getElementById('profilePanel');
+const adminProfile = document.getElementById('adminProfile');
+
+const loginTypeTabs = document.querySelectorAll('.login-type-tab');
+const citizenLoginForm = document.getElementById('citizenLoginForm');
+const adminLoginForm = document.getElementById('adminLoginForm');
+const showSignupBtn = document.getElementById('showSignupBtn');
+
+const brandTitle = document.getElementById('brandTitle');
+const brandSubtitle = document.getElementById('brandSubtitle');
+const headerRight = document.getElementById('headerRight');
+const signinText = document.getElementById('signinText');
+const profileTrigger = document.getElementById('profileTrigger');
+const notificationContainer = document.getElementById('notificationContainer');
+
+/* ---------- UTILITY FUNCTIONS ---------- */
+function escapeHtml(text) {
+  const div = document.createElement('div');
+  div.textContent = text;
+  return div.innerHTML;
+}
+
+function showNotification(message, type = 'success', duration = 5000) {
+  const notification = document.createElement('div');
+  notification.className = `notification ${type}`;
+  notification.textContent = message;
+  notification.setAttribute('role', 'alert');
+  
+  notificationContainer.appendChild(notification);
+  
+  setTimeout(() => notification.classList.add('show'), 100);
+  
+  setTimeout(() => {
+    notification.classList.remove('show');
+    setTimeout(() => {
+      if (notification.parentNode) {
+        notification.parentNode.removeChild(notification);
+      }
+    }, 300);
+  }, duration);
+}
+
+function getTimeAgo(timestamp) {
+  const now = Date.now();
+  const diffMs = now - timestamp;
+  const diffHours = Math.floor(diffMs / (1000 * 60 * 60));
+  const diffDays = Math.floor(diffHours / 24);
+  
+  if (diffHours < 1) return 'Just now';
+  if (diffHours < 24) return `${diffHours}h ago`;
+  if (diffDays < 30) return `${diffDays}d ago`;
+  return new Date(timestamp).toLocaleDateString();
+}
+
+function getStatusClass(status) {
+  const statusMap = {
+    'New': 'new',
+    'Validated': 'validated',
+    'In Progress': 'progress', 
+    'Resolved': 'resolved',
+    'Rejected': 'rejected'
+  };
+  return statusMap[status] || 'new';
+}
+
+/* ---------- SPLASH AND INITIALIZATION ---------- */
+window.addEventListener('load', () => {
+  setTimeout(() => { 
+    splash.style.opacity = '0';
+    splash.style.transform = 'scale(0.9)';
+    setTimeout(() => { 
+      splash.style.display = 'none'; 
+      initAfterSplash(); 
+    }, 600); 
+  }, 1200);
+});
+
+function initAfterSplash() {
+  const sessionData = dataManager.getSessionData();
+  if (sessionData && sessionData.loggedIn) {
+    currentUser = sessionData.user;
+    currentUserType = sessionData.userType;
+    
+    if (currentUserType === 'admin') {
+      setupAdminUI();
+      showAdminDashboard();
+    } else {
+      setupClientUI();
+      showClientDashboard();
+    }
+  } else {
+    showLandingPage();
+  }
+}
+
+/* ---------- LANDING PAGE SETUP ---------- */
+function showLandingPage() {
+  hideAllViews();
+  landingView.style.display = 'block';
+  galleryWrap.style.display = 'block';
+  setupGallery();
+  setupLandingPageEvents();
+}
+
+function hideAllViews() {
+  unifiedLogin.style.display = 'none';
+  landingView.style.display = 'none';
+  galleryWrap.style.display = 'none';
+  clientDashboard.style.display = 'none';
+  adminDashboard.style.display = 'none';
+  profilePanel.style.display = 'none';
+  adminProfile.style.display = 'none';
+  document.getElementById('privacyPanel').style.display = 'none';
+  document.getElementById('termsPanel').style.display = 'none';
+  document.getElementById('contactPanel').style.display = 'none';
+}
+
+function setupLandingPageEvents() {
+  // Make signin text clickable
+  signinText.addEventListener('click', showUnifiedLogin);
+  profileTrigger.addEventListener('click', showUnifiedLogin);
+  
+  // Update header for landing page
+  signinText.style.cursor = 'pointer';
+  profileTrigger.style.cursor = 'pointer';
+}
+
+/* ---------- GALLERY SETUP ---------- */
+function setupGallery() {
+  const gallery = document.getElementById('gallery');
+  const galleryImg = document.getElementById('galleryImg');
+  const galleryCaption = document.getElementById('galleryCaption');
+  
+  function updateGallery() {
+    const imageSrc = galleryImages[currentGalleryIndex];
+    galleryImg.src = imageSrc;
+    
+    const captions = [
+      'Community Infrastructure Improvements',
+      'Citizen Engagement Initiatives', 
+      'Smart City Development Projects'
+    ];
+    
+    galleryCaption.textContent = captions[currentGalleryIndex] || 'Community Initiatives & Improvements';
+  }
+  
+  // Auto-rotate gallery images
+  setInterval(() => {
+    currentGalleryIndex = (currentGalleryIndex + 1) % galleryImages.length;
+    updateGallery();
+  }, 4000);
+  
+  // Click to manually advance
+  gallery.addEventListener('click', () => {
+    currentGalleryIndex = (currentGalleryIndex + 1) % galleryImages.length;
+    updateGallery();
+  });
+  
+  updateGallery();
+}
+
+/* ---------- LOGIN SYSTEM ---------- */
+function showUnifiedLogin() {
+  hideAllViews();
+  unifiedLogin.style.display = 'flex';
+  populateStates();
+}
+
+// Login type tab switching
+loginTypeTabs.forEach(tab => {
+  tab.addEventListener('click', () => {
+    loginTypeTabs.forEach(t => t.classList.remove('active'));
+    tab.classList.add('active');
+    
+    const type = tab.dataset.type;
+    if (type === 'citizen') {
+      citizenLoginForm.style.display = 'block';
+      adminLoginForm.style.display = 'none';
+    } else {
+      citizenLoginForm.style.display = 'none';
+      adminLoginForm.style.display = 'block';
+    }
+  });
+});
+
+// Populate states dropdown
+function populateStates() {
+  const stateSelects = [document.getElementById('su_state')].filter(s => s);
+  stateSelects.forEach(select => {
+    while (select.children.length > 1) {
+      select.removeChild(select.lastChild);
+    }
+    
+    STATES.forEach(state => {
+      const option = document.createElement('option');
+      option.value = state;
+      option.textContent = state;
+      select.appendChild(option);
+    });
+  });
+}
+
+/* ---------- CITIZEN LOGIN ---------- */
+citizenLoginForm.addEventListener('submit', (e) => {
+  e.preventDefault();
+  
+  const email = document.getElementById('citizen_email').value.trim();
+  const password = document.getElementById('citizen_password').value.trim();
+  
+  if (!email || !password) {
+    showNotification('Please fill all fields', 'error');
+    return;
+  }
+  
+  const user = dataManager.findUser(email);
+  
+  if (user && user.password === password) {
+    currentUser = user;
+    currentUserType = 'citizen';
+    
+    dataManager.setSessionData({ 
+      loggedIn: true, 
+      user: user,
+      userType: 'citizen',
+      loginTime: Date.now()
+    });
+    
+    setupClientUI();
+    showClientDashboard();
+    showNotification(`Welcome back, ${user.name}!`, 'success');
+  } else {
+    showNotification('Invalid credentials. Please try again or sign up.', 'error');
+  }
+});
+
+/* ---------- ADMIN LOGIN ---------- */
+adminLoginForm.addEventListener('submit', (e) => {
+  e.preventDefault();
+  
+  const workerID = document.getElementById('admin_workerID').value.trim();
+  const department = document.getElementById('admin_department').value;
+  const password = document.getElementById('admin_password').value;
+  
+  if (!workerID || !department || !password) {
+    showNotification('Please fill all fields', 'error');
+    return;
+  }
+  
+  const admin = dataManager.findAdmin(workerID);
+  
+  if (admin && admin.password === password) {
+    admin.department = department; // Update department selection
+    currentUser = admin;
+    currentUserType = 'admin';
+    
+    dataManager.setSessionData({ 
+      loggedIn: true, 
+      user: admin,
+      userType: 'admin',
+      loginTime: Date.now()
+    });
+    
+    setupAdminUI();
+    showAdminDashboard();
+    showNotification('Login successful! Welcome to Admin Portal', 'success');
+  } else {
+    showNotification('Invalid credentials. Use demo credentials: admin001 / admin123', 'error');
+  }
+});
+
+/* ---------- SIGNUP SYSTEM ---------- */
+showSignupBtn.addEventListener('click', () => {
+  document.getElementById('signupModal').classList.add('open');
+  document.getElementById('signupModal').setAttribute('aria-hidden', 'false');
+});
+
+document.getElementById('signupClose').addEventListener('click', () => {
+  document.getElementById('signupModal').classList.remove('open');
+});
+
+document.getElementById('signupCancel').addEventListener('click', () => {
+  document.getElementById('signupModal').classList.remove('open');
+});
+
+// Email verification setup
+document.getElementById('su_email').addEventListener('input', (e) => {
+  const email = e.target.value.trim();
+  const verificationSection = document.getElementById('emailVerificationSection');
+  
+  if (email && email.includes('@')) {
+    verificationSection.style.display = 'block';
+  } else {
+    verificationSection.style.display = 'none';
+  }
+});
+
+document.getElementById('sendVerificationBtn').addEventListener('click', async () => {
+  const email = document.getElementById('su_email').value.trim();
+  if (!email) {
+    showNotification('Please enter email address first', 'error');
+    return;
+  }
+  
+  const btn = document.getElementById('sendVerificationBtn');
+  btn.textContent = 'Sending...';
+  btn.disabled = true;
+  
+  // Generate 6-digit code
+  const code = Math.floor(100000 + Math.random() * 900000).toString();
+  
+  try {
+    // Simulate sending email - in real app, call your backend API
+    await new Promise(resolve => setTimeout(resolve, 1500));
+    
+    // Store code (in real app, this would be done on backend)
+    dataManager.setVerificationCode(email, code);
+    
+    showNotification(`Verification code sent to ${email}`, 'success');
+    console.log('Demo verification code:', code); // For demo purposes
+    
+    // Show demo code in UI for testing
+    document.getElementById('verificationStatus').innerHTML = `
+      <div style="background:rgba(52, 152, 219, 0.1);color:var(--accent-blue);padding:8px 12px;border-radius:6px;font-size:12px;margin-top:8px">
+        <strong>Demo Mode:</strong> Your verification code is <strong>${code}</strong>
+      </div>
+    `;
+    
+    document.getElementById('verifyCodeBtn').disabled = false;
+  } catch (error) {
+    showNotification('Failed to send verification code', 'error');
+  } finally {
+    btn.textContent = 'Send Code';
+    btn.disabled = false;
+  }
+});
+
+document.getElementById('verifyCodeBtn').addEventListener('click', () => {
+  const email = document.getElementById('su_email').value.trim();
+  const enteredCode = document.getElementById('verificationCode').value.trim();
+  const storedCode = dataManager.getVerificationCode(email);
+  
+  const statusDiv = document.getElementById('verificationStatus');
+  
+  if (enteredCode === storedCode) {
+    statusDiv.innerHTML = '<span style="color:var(--accent-success)">✓ Email verified successfully</span>';
+    document.getElementById('verifyCodeBtn').textContent = 'Verified';
+    document.getElementById('verifyCodeBtn').disabled = true;
+    document.getElementById('verificationCode').disabled = true;
+  } else {
+    statusDiv.innerHTML = '<span style="color:var(--accent-danger)">✗ Invalid verification code</span>';
+  }
+});
+
+document.getElementById('signupForm').addEventListener('submit', (e) => {
+  e.preventDefault();
+  
+  const formData = {
+    name: document.getElementById('su_name').value.trim(),
+    email: document.getElementById('su_email').value.trim(),
+    mobile: document.getElementById('su_mobile').value.trim(),
+    state: document.getElementById('su_state').value,
+    address: document.getElementById('su_address').value.trim(),
+    password: document.getElementById('su_password').value,
+    confirm: document.getElementById('su_confirm').value
+  };
+  
+  // Validation
+  if (!formData.name || !formData.email || !formData.password || !formData.state) {
+    showNotification('Please fill all required fields', 'error');
+    return;
+  }
+  
+  if (formData.password.length < 8) {
+    showNotification('Password must be at least 8 characters long', 'error');
+    return;
+  }
+  
+  if (formData.password !== formData.confirm) {
+    showNotification('Passwords do not match', 'error');
+    return;
+  }
+  
+  // Check email verification
+  const storedCode = dataManager.getVerificationCode(formData.email);
+  const enteredCode = document.getElementById('verificationCode').value.trim();
+  if (!storedCode || storedCode !== enteredCode) {
+    showNotification('Please verify your email address first', 'error');
+    return;
+  }
+  
+  if (dataManager.findUser(formData.email)) {
+    showNotification('User with this email already exists', 'error');
+    return;
+  }
+  
+  const userData = {
+    name: formData.name,
+    email: formData.email,
+    mobile: formData.mobile,
+    state: formData.state,
+    address: formData.address,
+    password: formData.password,
+    created: Date.now(),
+    verified: true
+  };
+  
+  dataManager.addUser(userData);
+  dataManager.setSessionData({ 
+    loggedIn: true, 
+    user: userData,
+    userType: 'citizen',
+    loginTime: Date.now()
+  });
+  
+  currentUser = userData;
+  currentUserType = 'citizen';
+  
+  document.getElementById('signupModal').classList.remove('open');
+  setupClientUI();
+  showClientDashboard();
+  showNotification('Account created successfully! Welcome to CivicFix!', 'success');
+});
+
+/* ---------- CLIENT UI SETUP ---------- */
+function setupClientUI() {
+  brandTitle.textContent = 'CivicFix';
+  brandSubtitle.textContent = 'Community Portal';
+  
+  headerRight.innerHTML = `
+    <nav style="display:flex;gap:16px;align-items:center">
+      <a href="#" data-route="home" style="color:var(--neutral-600);font-weight:500;padding:8px 12px;border-radius:6px;transition:all 0.2s">Home</a>
+      <a href="#" id="navProfile" style="color:var(--neutral-600);font-weight:500;padding:8px 12px;border-radius:6px;transition:all 0.2s">Profile</a>
+    </nav>
+    <div style="display:flex;align-items:center;gap:12px">
+      <div style="font-weight:600;color:var(--primary-dark);font-size:14px">${escapeHtml(currentUser.name)}</div>
+      <button class="profile-icon" id="profileMenu" style="cursor:pointer;color:var(--primary-dark);font-weight:600;font-size:16px;background:var(--neutral-100);border:none">${currentUser.name.charAt(0).toUpperCase()}</button>
+    </div>
+  `;
+  
+  // Add event listeners
+  document.querySelector('[data-route="home"]').addEventListener('click', (e) => {
+    e.preventDefault();
+    showClientDashboard();
+  });
+  document.getElementById('navProfile').addEventListener('click', (e) => {
+    e.preventDefault();
+    showClientProfile();
+  });
+  document.getElementById('profileMenu').addEventListener('click', showClientProfile);
+}
+
+function showClientDashboard() {
+  hideAllViews();
+  clientDashboard.style.display = 'block';
+  setupClientDashboard();
+}
+
+function setupClientDashboard() {
+  // Setup action cards
+  document.getElementById('reportNewIssue').addEventListener('click', openReportModal);
+  document.getElementById('viewMyProfile').addEventListener('click', showClientProfile);
+  document.getElementById('contactSupport').addEventListener('click', () => {
+    hideAllViews();
+    document.getElementById('contactPanel').style.display = 'block';
+  });
+}
+
+/* ---------- ADMIN UI SETUP ---------- */
+function setupAdminUI() {
+  brandTitle.textContent = 'CivicFix Admin';
+  brandSubtitle.textContent = 'Municipal Management Portal';
+  
+  const newIssuesCount = dataManager.getIssues().filter(c => c.status === 'New').length;
+  
+  headerRight.innerHTML = `
+    <nav class="admin-nav">
+      <a href="#" class="nav-link active" data-view="dashboard">
+        Dashboard
+        <span class="nav-badge">${newIssuesCount}</span>
+      </a>
+      <a href="#" class="nav-link" data-view="issues">Issues</a>
+      <a href="#" class="nav-link" data-view="profile">Profile</a>
+    </nav>
+    <div style="display:flex;align-items:center;gap:12px">
+      <div style="font-weight:600;color:var(--primary-dark);font-size:14px">${escapeHtml(currentUser.name)}</div>
+      <div class="profile-icon" id="adminProfileMenu" style="cursor:pointer;background:var(--neutral-100);color:var(--primary-dark);font-weight:600;font-size:16px">${currentUser.name.charAt(0)}</div>
+    </div>
+  `;
+  
+  // Add navigation event listeners
+  document.querySelectorAll('.nav-link').forEach(link => {
+    link.addEventListener('click', (e) => {
+      e.preventDefault();
+      const view = link.dataset.view;
+      
+      document.querySelectorAll('.nav-link').forEach(l => l.classList.remove('active'));
+      link.classList.add('active');
+      
+      if (view === 'dashboard' || view === 'issues') {
+        showAdminDashboard();
+      } else if (view === 'profile') {
+        showAdminProfile();
+      }
+    });
+  });
+  
+  document.getElementById('adminProfileMenu').addEventListener('click', showAdminProfile);
+}
+
+function showAdminDashboard() {
+  hideAllViews();
+  adminDashboard.style.display = 'block';
+  
+  updateAdminStats();
+  renderAdminIssues();
+  setupAdminFilters();
+}
+
+/* ---------- ADMIN FUNCTIONS ---------- */
+function updateAdminStats() {
+  const issues = getAdminFilteredIssues();
+  const stats = {
+    new: issues.filter(c => c.status === 'New').length,
+    validated: issues.filter(c => c.status === 'Validated').length,
+    progress: issues.filter(c => c.status === 'In Progress').length,
+    resolved: issues.filter(c => c.status === 'Resolved').length,
+    rejected: issues.filter(c => c.status === 'Rejected').length
+  };
+  
+  document.getElementById('statNew').textContent = stats.new;
+  document.getElementById('statValidated').textContent = stats.validated;
+  document.getElementById('statProgress').textContent = stats.progress;
+  document.getElementById('statResolved').textContent = stats.resolved;
+  document.getElementById('statRejected').textContent = stats.rejected;
+  
+  // Update counts in filter tabs
+  document.getElementById('countAll').textContent = issues.length;
+  document.getElementById('countNew').textContent = stats.new;
+  document.getElementById('countValidated').textContent = stats.validated;
+  document.getElementById('countProgress').textContent = stats.progress;
+  document.getElementById('countResolved').textContent = stats.resolved;
+  document.getElementById('countRejected').textContent = stats.rejected;
+  
+  // Update dashboard subtitle
+  const deptFilter = currentUser.department === 'Administration' ? 'all departments' : currentUser.department;
+  document.getElementById('dashboardSubtitle').textContent = `Managing community issues for ${deptFilter}`;
+}
+
+function getAdminFilteredIssues() {
+  let issues = dataManager.getIssues();
+  
+  // Filter by department (unless admin)
+  if (currentUser.department !== 'Administration') {
+    issues = issues.filter(c => c.dept === currentUser.department);
+  }
+  
+  // Apply status filter
+  if (currentAdminFilter !== 'all') {
+    const statusMap = {
+      'new': 'New',
+      'validated': 'Validated',
+      'progress': 'In Progress',
+      'resolved': 'Resolved',
+      'rejected': 'Rejected'
+    };
+    issues = issues.filter(c => c.status === statusMap[currentAdminFilter]);
+  }
+  
+  return issues.sort((a, b) => b.datetime - a.datetime);
+}
+
+function renderAdminIssues() {
+  const filtered = getAdminFilteredIssues();
+  const issuesGrid = document.getElementById('issuesGrid');
+  const emptyState = document.getElementById('emptyState');
+  
+  if (filtered.length === 0) {
+    issuesGrid.style.display = 'none';
+    emptyState.style.display = 'block';
+    return;
+  }
+  
+  issuesGrid.style.display = 'grid';
+  emptyState.style.display = 'none';
+  
+  issuesGrid.innerHTML = '';
+  
+  filtered.forEach(issue => {
+    const card = createAdminIssueCard(issue);
+    issuesGrid.appendChild(card);
+  });
+}
+
+function createAdminIssueCard(issue) {
+  const div = document.createElement('div');
+  div.className = 'issue-card';
+  div.dataset.id = issue.id;
+  
+  const timeAgo = getTimeAgo(issue.datetime);
+  const hasRemarks = issue.adminRemarks && issue.adminRemarks.length > 0;
+  
+    div.innerHTML = `
+    <div class="status-badge ${getStatusClass(issue.status)}">${escapeHtml(issue.status)}</div>
+    
+    <div class="issue-header">
+      <div class="issue-id">ID: ${issue.id}</div>
+      <div class="issue-priority ${issue.priority || 'medium'}">${(issue.priority || 'medium').toUpperCase()}</div>
+    </div>
+    
+    <div class="issue-body">
+      <div class="issue-title">${escapeHtml(issue.title)}</div>
+      <div class="issue-desc">${escapeHtml(issue.desc.length > 120 ? issue.desc.substring(0, 120) + '...' : issue.desc)}</div>
+      <div class="issue-location">📍 ${escapeHtml(issue.location)}</div>
+      
+      <div class="issue-meta">
+        <div><strong>Submitted:</strong> ${timeAgo}</div>
+        <div><strong>Department:</strong> ${escapeHtml(issue.dept)}</div>
+        <div><strong>Assigned:</strong> ${issue.assignedTo || 'Unassigned'}</div>
+        <div><strong>Priority:</strong> ${(issue.priority || 'medium').toUpperCase()}</div>
+      </div>
+      
+      <div class="issue-citizen">
+        <div class="citizen-name">👤 ${escapeHtml(issue.reporter)}</div>
+        <div class="citizen-contact">📞 ${escapeHtml(issue.contact)} • 📧 ${escapeHtml(issue.email)}</div>
+      </div>
+      
+      <div class="issue-image">
+        ${issue.image ? 
+          `<img src="${issue.image}" alt="Issue photo">` : 
+          '<div class="no-image">No image provided</div>'
+        }
+      </div>
+      
+      <div class="issue-actions">
+        <button class="btn-action btn-primary" onclick="openAdminDetailsModal(${issue.id})">View Details</button>
+        <button class="btn-action btn-secondary" onclick="openAdminStatusModal(${issue.id})">Update Status</button>
+        ${hasRemarks ? '<span style="color:var(--accent-warning);font-size:11px;font-weight:600">📝 Has Updates</span>' : ''}
+      </div>
+    </div>
+  `;
+  
+  return div;
+}
+
+function setupAdminFilters() {
+  document.querySelectorAll('#adminFilterTabs .filter-tab').forEach(tab => {
+    tab.addEventListener('click', () => {
+      document.querySelectorAll('#adminFilterTabs .filter-tab').forEach(t => t.classList.remove('active'));
+      tab.classList.add('active');
+      currentAdminFilter = tab.dataset.filter;
+      updateAdminStats();
+      renderAdminIssues();
+    });
+  });
+}
+
+/* ---------- REPORT MODAL FUNCTIONS ---------- */
+function openReportModal() {
+  const modal = document.getElementById('reportModal');
+  
+  if (currentUser) {
+    document.getElementById('r_name').value = currentUser.name || '';
+    document.getElementById('r_email').value = currentUser.email || '';
+    document.getElementById('r_mobile').value = currentUser.mobile || '';
+  }
+  
+  modal.classList.add('open');
+  modal.setAttribute('aria-hidden', 'false');
+}
+
+document.getElementById('reportClose').addEventListener('click', () => {
+  document.getElementById('reportModal').classList.remove('open');
+});
+
+document.getElementById('reportCancel').addEventListener('click', () => {
+  document.getElementById('reportModal').classList.remove('open');
+});
+
+/* ---------- Enhanced Report Form Submit ---------- */
+document.getElementById('reportForm').addEventListener('submit', (e) => {
+  e.preventDefault();
+  
+  const formData = {
+    name: document.getElementById('r_name').value.trim(),
+    email: document.getElementById('r_email').value.trim(),
+    mobile: document.getElementById('r_mobile').value.trim(),
+    title: document.getElementById('r_title').value.trim(),
+    details: document.getElementById('r_details').value.trim(),
+    location: document.getElementById('r_location').value.trim()
+  };
+  
+  if (!formData.name || !formData.email || !formData.title || !formData.details || !formData.location) {
+    showNotification('Please fill all required fields', 'error');
+    return;
+  }
+  
+  const submitBtn = e.target.querySelector('button[type="submit"]');
+  const originalText = submitBtn.textContent;
+  submitBtn.textContent = 'Submitting...';
+  submitBtn.disabled = true;
+  
+  setTimeout(() => {
+    const id = Date.now() + Math.floor(Math.random() * 1000);
+    const issue = { 
+      id, 
+      title: formData.title, 
+      desc: formData.details, 
+      location: formData.location, 
+      status: 'New', 
+      image: capturedImageData || uploadedImageData || '', 
+      datetime: Date.now(), 
+      dept: DEPARTMENTS[Math.floor(Math.random() * DEPARTMENTS.length)], 
+      email: formData.email, 
+      reporter: formData.name, 
+      contact: formData.mobile || formData.email,
+      priority: 'medium',
+      adminRemarks: []
+    };
+    
+    dataManager.addIssue(issue);
+    
+    document.getElementById('reportModal').classList.remove('open');
+    document.getElementById('reportForm').reset();
+    stopCamera();
+    
+    // Reset image data
+    capturedImageData = null;
+    uploadedImageData = null;
+    if (previewSection) previewSection.style.display = 'none';
+    if (capturedImage) capturedImage.src = '';
+    if (filePreview) filePreview.src = '';
+    
+    if (currentUserType === 'admin') {
+      updateAdminStats();
+      renderAdminIssues();
+    }
+    
+    showNotification(`Issue "${formData.title}" submitted successfully! Tracking ID: #${id}`, 'success');
+    
+    submitBtn.textContent = originalText;
+    submitBtn.disabled = false;
+  }, 1500);
+});
+
+/* ---------- ADMIN MODAL FUNCTIONS ---------- */
+
+// Admin status update modal
+function openAdminStatusModal(issueId) {
+  const issue = dataManager.getIssues().find(c => c.id === issueId);
+  if (!issue) return;
+  
+  const modal = document.getElementById('adminStatusModal');
+  const content = document.getElementById('adminStatusModalContent');
+  
+  content.innerHTML = `
+    <div style="background:var(--neutral-50);padding:16px;border-radius:12px;margin-bottom:20px;border:1px solid var(--neutral-200)">
+      <h4 style="color:var(--primary-dark);margin-bottom:8px">Issue: ${escapeHtml(issue.title)}</h4>
+      <p style="color:var(--neutral-600);font-size:14px">Reporter: ${escapeHtml(issue.reporter)} • Current Status: <strong>${issue.status}</strong></p>
+    </div>
+  `;
+  
+  document.getElementById('statusUpdateForm').dataset.issueId = issueId;
+  modal.classList.add('open');
+  modal.setAttribute('aria-hidden', 'false');
+}
+
+// Admin details modal
+function openAdminDetailsModal(issueId) {
+  const issue = dataManager.getIssues().find(c => c.id === issueId);
+  if (!issue) return;
+  
+  openStatusModal(issue); // Reuse the same detailed modal
+}
+
+function openStatusModal(issue) {
+  const modal = document.getElementById('statusModal');
+  const content = document.getElementById('statusContent');
+  
+  const date = new Date(issue.datetime);
+  
+  let html = `
+    <div style="display:grid;grid-template-columns:2fr 1fr;gap:24px;margin-bottom:24px">
+      <div>
+        <h3 style="color:var(--primary-dark);margin-bottom:12px;font-weight:700">${escapeHtml(issue.title)}</h3>
+        <p style="color:var(--neutral-600);margin-bottom:16px;line-height:1.5">${escapeHtml(issue.desc)}</p>
+        
+        <div style="margin-bottom:16px">
+          <div><strong>Status:</strong> <span class="status-badge ${getStatusClass(issue.status)}" style="position:relative;top:0;right:0">${issue.status}</span></div>
+          <div><strong>Department:</strong> ${escapeHtml(issue.dept)}</div>
+          <div><strong>Location:</strong> ${escapeHtml(issue.location)}</div>
+          <div><strong>Submitted:</strong> ${date.toLocaleDateString()} ${date.toLocaleTimeString()}</div>
+          <div><strong>Reporter:</strong> ${escapeHtml(issue.reporter)}</div>
+        </div>
+      </div>
+      <div>
+        ${issue.image ? 
+          `<img src="${issue.image}" style="width:100%;height:200px;object-fit:cover;border-radius:8px;">` : 
+          '<div style="width:100%;height:200px;background:var(--neutral-100);display:flex;align-items:center;justify-content:center;border-radius:8px;color:var(--neutral-500)">No Image</div>'
+        }
+      </div>
+    </div>
+  `;
+  
+  // Admin remarks section
+  if (issue.adminRemarks && issue.adminRemarks.length > 0) {
+    html += `
+      <div style="border-top:1px solid var(--neutral-200);padding-top:20px">
+        <h4 style="color:var(--primary-dark);margin-bottom:16px">Admin Updates & Progress</h4>
+    `;
+    
+    issue.adminRemarks.forEach(remark => {
+      const remarkDate = new Date(remark.date);
+      html += `
+        <div style="background:var(--bg-card);padding:16px;border-radius:8px;margin-bottom:12px;border:1px solid var(--neutral-200)">
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
+            <strong style="color:var(--primary-dark)">${escapeHtml(remark.admin)}</strong>
+            <span style="color:var(--neutral-500);font-size:12px">${remarkDate.toLocaleDateString()} ${remarkDate.toLocaleTimeString()}</span>
+          </div>
+          <div style="color:var(--neutral-700);margin-bottom:8px">${escapeHtml(remark.remark)}</div>
+          <span class="status-badge ${getStatusClass(remark.status)}" style="position:relative;top:0;right:0">${remark.status}</span>
+        </div>
+      `;
+    });
+    
+    html += '</div>';
+  } else {
+    html += `
+      <div style="background:var(--neutral-50);padding:20px;border-radius:12px;text-align:center;border:2px dashed var(--neutral-300);margin-top:20px">
+        <div style="color:var(--neutral-600);font-weight:500;margin-bottom:8px">No Admin Updates Yet</div>
+        <div style="color:var(--neutral-500);font-size:14px">This issue is being reviewed by the municipal team.</div>
+      </div>
+    `;
+  }
+  
+  content.innerHTML = html;
+  modal.classList.add('open');
+  modal.setAttribute('aria-hidden', 'false');
+}
+
+// Status update form submission
+document.getElementById('statusUpdateForm').addEventListener('submit', (e) => {
+  e.preventDefault();
+  
+  const issueId = parseInt(e.target.dataset.issueId);
+  const newStatus = document.getElementById('newStatus').value;
+  const adminRemark = document.getElementById('adminRemark').value.trim();
+  
+  if (!newStatus || !adminRemark) {
+    showNotification('Please select status and add remark', 'error');
+    return;
+  }
+  
+  // Update issue
+  const updates = {
+    status: newStatus
+  };
+  
+  const issue = dataManager.updateIssue(issueId, updates);
+  if (issue) {
+    // Add admin remark
+    if (!issue.adminRemarks) issue.adminRemarks = [];
+    issue.adminRemarks.push({
+      date: Date.now(),
+      admin: currentUser.name,
+      remark: adminRemark,
+      status: newStatus
+    });
+    
+    // Save the updated issue
+    dataManager.saveData();
+    
+    // Refresh UI
+    if (currentUserType === 'admin') {
+      updateAdminStats();
+      renderAdminIssues();
+    }
+    
+    // Close modal and reset form
+    document.getElementById('adminStatusModal').classList.remove('open');
+    document.getElementById('statusUpdateForm').reset();
+    
+    showNotification(`Issue status updated to "${newStatus}" successfully!`, 'success');
+  }
+});
+
+/* ---------- PROFILE FUNCTIONS ---------- */
+function showClientProfile() {
+  hideAllViews();
+  profilePanel.style.display = 'block';
+  renderClientProfile();
+}
+
+function showAdminProfile() {
+  hideAllViews();
+  adminProfile.style.display = 'block';
+  renderAdminProfile();
+}
+
+function renderClientProfile() {
+  const profileInfo = document.getElementById('profileInfo');
+  
+  let html = `
+    <div class="profile-header">
+      <div class="profile-avatar">${currentUser.name.charAt(0).toUpperCase()}</div>
+      <div class="profile-info">
+        <div class="profile-name">${escapeHtml(currentUser.name)}</div>
+        <div class="profile-field">
+          <span class="profile-field-label">Email:</span>
+          <span class="profile-field-value">${escapeHtml(currentUser.email)}</span>
+        </div>
+        <div class="profile-field">
+          <span class="profile-field-label">Mobile:</span>
+          <span class="profile-field-value">${escapeHtml(currentUser.mobile || '—')}</span>
+        </div>
+        <div class="profile-field">
+          <span class="profile-field-label">State:</span>
+          <span class="profile-field-value">${escapeHtml(currentUser.state || '—')}</span>
+        </div>
+        <div class="profile-field">
+          <span class="profile-field-label">Address:</span>
+          <span class="profile-field-value">${escapeHtml(currentUser.address || '—')}</span>
+        </div>
+        <div style="margin-top:24px;display:flex;gap:12px">
+          <button class="btn-primary" id="logoutBtn">Logout</button>
+          <button class="btn-secondary" id="reportIssueFromProfile">Report New Issue</button>
+        </div>
+      </div>
+    </div>
+  `;
+  
+  profileInfo.innerHTML = html;
+  
+  document.getElementById('logoutBtn').addEventListener('click', logout);
+  document.getElementById('reportIssueFromProfile').addEventListener('click', openReportModal);
+}
+
+function renderAdminProfile() {
+  const adminProfileInfo = document.getElementById('adminProfileInfo');
+  const myIssues = dataManager.getIssues().filter(c => c.assignedTo === currentUser.workerID);
+  const myResolved = myIssues.filter(c => c.status === 'Resolved').length;
+  const myAssigned = myIssues.filter(c => c.status !== 'Resolved' && c.status !== 'Rejected').length;
+  
+  let html = `
+    <div class="profile-header">
+      <div class="profile-avatar">${currentUser.name.charAt(0)}</div>
+      <div class="profile-info">
+        <div class="profile-name">${escapeHtml(currentUser.name)}</div>
+        <div style="color:var(--accent-warning);font-weight:600;margin-bottom:12px;padding:6px 12px;background:rgba(243, 156, 18, 0.1);border-radius:20px;display:inline-block;font-size:14px">${currentUser.role}</div>
+        <div class="profile-field">
+          <span class="profile-field-label">Worker ID:</span>
+          <span class="profile-field-value">${escapeHtml(currentUser.workerID)}</span>
+        </div>
+        <div class="profile-field">
+          <span class="profile-field-label">Department:</span>
+          <span class="profile-field-value">${escapeHtml(currentUser.department)}</span>
+        </div>
+        <div class="profile-field">
+          <span class="profile-field-label">Email:</span>
+          <span class="profile-field-value">${escapeHtml(currentUser.email)}</span>
+        </div>
+        <div class="profile-field">
+          <span class="profile-field-label">Phone:</span>
+          <span class="profile-field-value">${escapeHtml(currentUser.phone)}</span>
+        </div>
+        <div style="margin-top:24px">
+          <button class="btn-primary" id="adminLogoutBtn">Logout</button>
+        </div>
+      </div>
+    </div>
+    
+    <div style="border-top:1px solid var(--neutral-200);padding-top:24px;margin-top:24px">
+      <h3 style="color:var(--primary-dark);margin-bottom:16px;font-weight:600">Performance Statistics</h3>
+      <div class="stats-grid">
+        <div class="stat-card">
+          <span class="stat-number">${myResolved}</span>
+          <div class="stat-label">Resolved by Me</div>
+        </div>
+        <div class="stat-card">
+          <span class="stat-number">${myAssigned}</span>
+          <div class="stat-label">Currently Assigned</div>
+        </div>
+        <div class="stat-card">
+          <span class="stat-number">2.3</span>
+          <div class="stat-label">Avg Response (days)</div>
+        </div>
+      </div>
+    </div>
+  `;
+  
+  adminProfileInfo.innerHTML = html;
+  
+  document.getElementById('adminLogoutBtn').addEventListener('click', logout);
+}
+
+/* ---------- LOGOUT FUNCTION ---------- */
+function logout() {
+  if (confirm('Are you sure you want to logout?')) {
+    dataManager.setSessionData(null);
+    currentUser = null;
+    currentUserType = null;
+    showNotification('You have been logged out successfully', 'success');
+    setTimeout(() => location.reload(), 1000);
+  }
+}
+
+/* ---------- MODAL CLOSE HANDLERS ---------- */
+document.addEventListener('click', (e) => {
+  if (e.target.classList.contains('modal')) {
+    const modals = ['statusModal', 'adminStatusModal', 'detailsModal', 'reportModal', 'signupModal'];
+    modals.forEach(modalId => {
+      if (e.target.id === modalId) {
+        e.target.classList.remove('open');
+        e.target.setAttribute('aria-hidden', 'true');
+      }
+    });
+  }
+});
+
+document.addEventListener('keydown', (e) => {
+  if (e.key === 'Escape') {
+    document.querySelectorAll('.modal.open').forEach(modal => {
+      modal.classList.remove('open');
+      modal.setAttribute('aria-hidden', 'true');
+    });
+  }
+});
+
+// Close button handlers
+['statusClose', 'adminStatusModalClose', 'detailsModalClose', 'statusCancel'].forEach(id => {
+  const btn = document.getElementById(id);
+  if (btn) {
+    btn.addEventListener('click', () => {
+      btn.closest('.modal').classList.remove('open');
+    });
+  }
+});
+
+/* ---------- FOOTER NAVIGATION ---------- */
+['ftHome', 'ftProfile', 'ftPrivacy', 'ftTerms', 'ftContact'].forEach(id => {
+  const element = document.getElementById(id);
+  if (element) {
+    element.addEventListener('click', (e) => { 
+      e.preventDefault(); 
+      
+      switch (id) {
+        case 'ftHome':
+          if (currentUserType === 'admin') {
+            showAdminDashboard();
+          } else if (currentUserType === 'citizen') {
+            showClientDashboard();
+          } else {
+            showLandingPage();
+          }
+          break;
+        case 'ftProfile':
+          if (currentUserType === 'admin') {
+            showAdminProfile();
+          } else if (currentUserType === 'citizen') {
+            showClientProfile();
+          } else {
+            showUnifiedLogin();
+          }
+          break;
+        case 'ftPrivacy':
+          hideAllViews();
+          document.getElementById('privacyPanel').style.display = 'block';
+          break;
+        case 'ftTerms':
+          hideAllViews();
+          document.getElementById('termsPanel').style.display = 'block';
+          break;
+        case 'ftContact':
+          hideAllViews();
+          document.getElementById('contactPanel').style.display = 'block';
+          break;
+      }
+    });
+  }
+});
+
+/* ---------- REFRESH FUNCTIONALITY ---------- */
+document.getElementById('refreshBtn')?.addEventListener('click', () => {
+  if (currentUserType === 'admin') {
+    updateAdminStats();
+    renderAdminIssues();
+  }
+  showNotification('Dashboard refreshed successfully!', 'success');
+});
+
+/* ---------- INITIALIZATION ---------- */
+document.addEventListener('DOMContentLoaded', () => {
+  showNotification('CivicFix Professional Portal loaded successfully!', 'success', 3000);
+});
+
+// Auto-refresh for admin dashboard
+setInterval(() => {
+  if (currentUserType === 'admin' && adminDashboard.style.display !== 'none') {
+    updateAdminStats();
+  }
+}, 30000);
+
+
+
+/* ---------- GLOBAL IMAGE VARIABLES FIX ---------- */
+let capturedImageData = null;
+let uploadedImageData = null;
+
+const capturedImage = document.getElementById('capturedImage');
+const filePreview = document.getElementById('filePreview');
+const previewSection = document.getElementById('previewSection');
+
+/* ---------- CAMERA CAPTURE ---------- */
+document.getElementById('captureBtn')?.addEventListener('click', () => {
+  const video = document.getElementById('video');
+  if (!video) return;
+  const canvas = document.createElement('canvas');
+  canvas.width = video.videoWidth;
+  canvas.height = video.videoHeight;
+  const ctx = canvas.getContext('2d');
+  ctx.drawImage(video, 0, 0);
+  capturedImageData = canvas.toDataURL('image/png');
+  if (capturedImage) capturedImage.src = capturedImageData;
+  if (previewSection) previewSection.style.display = 'grid';
+});
+
+/* ---------- FILE UPLOAD ---------- */
+document.getElementById('fileInput')?.addEventListener('change', (e) => {
+  const file = e.target.files[0];
+  if (file) {
+    const reader = new FileReader();
+    reader.onload = (ev) => {
+      uploadedImageData = ev.target.result;
+      if (filePreview) filePreview.src = uploadedImageData;
+      if (previewSection) previewSection.style.display = 'grid';
+    };
+    reader.readAsDataURL(file);
+  }
+});
+
+</script>
+</body>
+</html>
