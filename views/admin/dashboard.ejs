@@ -17,76 +17,42 @@
       text-align: center;
       color: white;
     }
-    header h2 {
-      margin: 0;
-      font-size: 28px;
-    }
+    header h2 { margin: 0; font-size: 28px; }
     .stats {
-      display: flex;
-      justify-content: center;
-      flex-wrap: wrap;
-      gap: 25px;
-      margin: 25px auto;
-      max-width: 800px;
+      display: flex; justify-content: center; flex-wrap:  nowrap;
+      gap: 25px; margin: 25px auto; max-width: 800px;
     }
     .stat-card {
-      background: white;
-      padding: 15px 25px;
-      border-radius: 8px;
+      background: white; padding: 15px 25px; border-radius: 8px;
       box-shadow: 0 2px 6px rgba(0,0,0,0.1);
-      font-size: 18px;
-      font-weight: bold;
-      min-width: 120px;
-      text-align: center;
+      font-size: 18px; font-weight: bold; min-width: 120px; text-align: center;
     }
-    .actions {
-      text-align: center;
-      margin-bottom: 25px;
-    }
+    .actions { text-align: center; margin-bottom: 25px; }
     .actions a {
-      display: inline-block;
-      margin: 0 10px;
-      padding: 10px 18px;
-      text-decoration: none;
-      color: white;
-      border-radius: 6px;
-      font-size: 15px;
+      display: inline-block; margin: 0 10px; padding: 10px 18px;
+      text-decoration: none; color: white; border-radius: 6px; font-size: 15px;
     }
     .csv-btn { background: #2e7d32; }
     .excel-btn { background: #1e88e5; }
     .issue-container {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 25px;
-      justify-content: center;
-      padding: 0 20px 40px;
+      display: flex; flex-wrap: wrap; gap: 25px;
+      justify-content: center; padding: 0 20px 40px;
     }
     .issue-card {
-      background: white;
-      border-radius: 10px;
+      background: white; border-radius: 10px;
       box-shadow: 0 3px 8px rgba(0,0,0,0.1);
-      width: 260px;
-      padding: 18px;
+      width: 280px; padding: 18px; position: relative;
     }
-    .issue-card h4 {
-      margin: 0 0 8px;
-      color: #2e7d32;
+    .issue-card h4 { margin: 0 0 8px; color: #2e7d32; }
+    .issue-card p { margin: 6px 0; font-size: 14px; }
+    .issue-card img {
+      max-width: 100%; height: auto;
+      border-radius: 6px; margin-top: 8px;
     }
-    .issue-card p {
-      margin: 6px 0;
-      font-size: 14px;
-    }
-    .issue-card form {
-      display: inline-block;
-      margin-top: 8px;
-    }
+    .issue-card form { display: inline-block; margin-top: 8px; }
     .btn {
-      padding: 6px 12px;
-      border: none;
-      border-radius: 5px;
-      cursor: pointer;
-      font-size: 13px;
-      color: white;
+      padding: 6px 12px; border: none; border-radius: 5px;
+      cursor: pointer; font-size: 13px; color: white;
     }
     .btn-success { background: #43a047; }
     .btn-danger { background: #e53935; }
@@ -98,54 +64,67 @@
 </head>
 <body>
 
-  <header>
-    <h2>Admin Dashboard</h2>
-  </header>
+<header>
+  <h2>Admin Dashboard</h2>
+</header>
 
-  <!-- Stats Section -->
-  <div class="stats">
-    <div class="stat-card">Total: <%= counts.total %></div>
-    <div class="stat-card">Pending: <%= counts.pending %></div>
-    <div class="stat-card">Approved: <%= counts.approved %></div>
-    <div class="stat-card">Resolved: <%= counts.resolved %></div>
-    <div class="stat-card">Rejected: <%= counts.rejected %></div>
-  </div>
+<!-- Stats -->
+<div class="stats">
+  <div class="stat-card">Total: <%= counts.total %></div>
+  <div class="stat-card">Pending: <%= counts.pending %></div>
+  <div class="stat-card">Approved: <%= counts.approved %></div>
+  <div class="stat-card">Resolved: <%= counts.resolved %></div>
+  <div class="stat-card">Rejected: <%= counts.rejected %></div>
+</div>
 
-  <!-- Download buttons -->
-  <div class="actions">
-    <a href="/admin/export/csv" class="csv-btn">⬇ Download CSV</a>
-    <a href="/admin/export/excel" class="excel-btn">⬇ Download Excel</a>
-  </div>
+<!-- Download buttons -->
+<div class="actions">
+  <a href="/admin/export/csv" class="csv-btn">⬇ Download CSV</a>
+  <a href="/admin/export/excel" class="excel-btn">⬇ Download Excel</a>
+</div>
 
-  <!-- Issues List -->
-  <div class="issue-container">
-    <% if (issues && issues.length > 0) { %>
-      <% issues.forEach(i => { %>
-        <div class="issue-card">
-          <h4><%= i.title %></h4>
-          <p><%= i.description %></p>
-          <p><strong>Status:</strong> <%= i.status %></p>
-          <p><strong>Priority:</strong> <%= i.priority || "N/A" %></p>
-          <p><strong>Category:</strong> <%= i.category || "N/A" %></p>
+<!-- Issues -->
+<div class="issue-container">
+  <% if (issues && issues.length > 0) { %>
+    <% issues.forEach(i => { %>
+      <div class="issue-card">
+        <h4><%= i.title %></h4>
+        <% if(i.image){ %>
+          <img src="<%= i.image %>" alt="Issue Photo">
+        <% } %>
+        <p><strong>Description:</strong><%= i.description %></p>
+        <p><strong>Status:</strong> <%= i.status %></p>
+        <p><strong>Priority:</strong> <%= i.priority || "N/A" %></p>
+        <p><strong>Category:</strong> <%= i.category || "N/A" %></p>
 
-          <% if(i.status === 'pending'){ %>
-            <form action="/admin/issue/<%= i._id %>/approve" method="POST">
-              <button type="submit" class="btn btn-success">Approve</button>
-            </form>
-            <form action="/admin/issue/<%= i._id %>/reject" method="POST">
-              <button type="submit" class="btn btn-danger">Reject</button>
-            </form>
-          <% } else if(i.status === 'approved'){ %>
-            <form action="/admin/issue/<%= i._id %>/resolve" method="POST">
-              <button type="submit" class="btn btn-primary">Resolve</button>
-            </form>
-          <% } %>
-        </div>
-      <% }) %>
-    <% } else { %>
-      <p style="text-align:center; font-size:16px;">No issues found.</p>
-    <% } %>
-  </div>
+        <% if(i.location){ %>
+          <p><strong>Location:</strong> <%= i.location %></p>
+        <% } %>
+
+        <% if(i.createdAt){ %>
+          <p><strong>Date & Time:</strong>
+            <%= new Date(i.createdAt).toLocaleString() %>
+          </p>
+        <% } %>
+
+        <% if(i.status === 'pending'){ %>
+          <form action="/admin/issue/<%= i._id %>/approve" method="POST">
+            <button type="submit" class="btn btn-success">Approve</button>
+          </form>
+          <form action="/admin/issue/<%= i._id %>/reject" method="POST">
+            <button type="submit" class="btn btn-danger">Reject</button>
+          </form>
+        <% } else if(i.status === 'approved'){ %>
+          <form action="/admin/issue/<%= i._id %>/resolve" method="POST">
+            <button type="submit" class="btn btn-primary">Resolve</button>
+          </form>
+        <% } %>
+      </div>
+    <% }) %>
+  <% } else { %>
+    <p style="text-align:center; font-size:16px;">No issues found.</p>
+  <% } %>
+</div>
 
 </body>
 </html>
