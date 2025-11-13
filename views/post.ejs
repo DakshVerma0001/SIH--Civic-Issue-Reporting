@@ -1,111 +1,75 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Post New Issue</title>
-  <style>
-    body {
-      font-family: Arial, sans-serif;
-      margin: 0;
-      padding: 0;
-      background: linear-gradient(135deg, #e8f5e9, #e3f2fd);
-      color: #333;
-    }
-    header {
-      background: #2e7d32;
-      color: white;
-      text-align: center;
-      padding: 20px;
-    }
-    header h1 {
-      margin: 0;
-      font-size: 26px;
-    }
-    .container {
-      max-width: 650px;
-      margin: 40px auto;
-      padding: 25px;
-      background: white;
-      border-radius: 12px;
-      box-shadow: 0 4px 10px rgba(0,0,0,0.1);
-    }
-    label {
-      font-weight: bold;
-      margin-bottom: 5px;
-      display: block;
-    }
-    input[type="text"],
-    textarea,
-    input[type="file"] {
-      width: 100%;
-      padding: 10px;
-      margin-bottom: 15px;
-      border: 1px solid #ccc;
-      border-radius: 6px;
-      font-size: 15px;
-    }
-    textarea {
-      min-height: 120px;
-      resize: vertical;
-    }
-    button,
-    input[type="submit"] {
-      background: #42a5f5;
-      color: white;
-      border: none;
-      border-radius: 6px;
-      padding: 10px 16px;
-      font-size: 15px;
-      cursor: pointer;
-      margin-right: 8px;
-      transition: background 0.3s;
-    }
-    button:hover,
-    input[type="submit"]:hover {
-      background: #1e88e5;
-    }
-    .manual-box {
-      background: #f1f8e9;
-      padding: 10px;
-      border-radius: 8px;
-      margin-bottom: 15px;
-    }
-  </style>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Civic Issue Report</title>
+  <script src="https://cdn.tailwindcss.com"></script>
 </head>
-<body>
 
-  <header>
-    <h1>Post a New Civic Issue</h1>
-  </header>
+<body class="bg-gray-50 p-6">
 
-  <div class="container">
-    <form action="/post" method="post" enctype="multipart/form-data">
-      <label for="title">Title</label>
-      <input type="text" id="title" placeholder="Enter issue title" name="title" required>
+  <form action="/post" method="post" enctype="multipart/form-data"
+        class="bg-white p-6 rounded-xl shadow-md max-w-md mx-auto space-y-4">
+        
+    <h1 class="text-2xl font-bold text-center">Report Civic Issue</h1>
 
-      <label for="description">Description</label>
-      <textarea id="description" placeholder="Describe your problem..." name="description" required></textarea>
+    <!-- Title -->
+    <input type="text" name="title" placeholder="Enter title"
+      class="border p-2 rounded w-full" required />
 
-      <!-- Hidden fields for location -->
-      <input type="hidden" name="location" id="location">
-      <input type="hidden" name="latitude" id="latitude">
-      <input type="hidden" name="longitude" id="longitude">
+    <!-- Description -->
+    <textarea name="description" placeholder="Enter your problem!"
+      class="border p-2 rounded w-full" required></textarea>
 
-      <div class="manual-box">
-        <label for="manualLocation">Enter location manually (optional):</label>
-        <input type="text" id="manualLocation" name="manualLocation" placeholder="Type location here">
-        <button type="button" onclick="getLocation()">📍 Use My Location</button>
-      </div>
+    <!-- Hidden fields -->
+    <input type="hidden" name="location" id="location">
+    <input type="hidden" name="latitude" id="latitude">
+    <input type="hidden" name="longitude" id="longitude">
+    <input type="hidden" name="timestamp" id="timestamp">
 
-      <label for="image">Upload Image</label>
-      <input type="file" id="image" name="image">
+    <!-- Manual Location -->
+    <div>
+      <label class="block font-semibold mb-1">Enter location manually:</label>
+      <input type="text" id="manualLocation" name="manualLocation"
+        placeholder="Enter location" class="border p-2 rounded w-full">
+    </div>
 
-      <input type="submit" value="Submit Issue">
-    </form>
-  </div>
+    <!-- Auto Location -->
+    <button type="button" onclick="getLocation()"
+      class="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600">
+      📍 Use My Location
+    </button>
 
+    <!-- Photo Section -->
+    <div id="photoSection">
+      <label class="block font-semibold mt-3 mb-1">Upload or Capture Photo:</label>
+
+      <!-- Upload -->
+      <input type="file" id="uploadImage" name="image" accept="image/*"
+        class="border p-2 rounded w-full mb-2">
+
+      <!-- Capture (only shown on mobile) -->
+      <button type="button" id="captureBtn"
+        class="bg-gray-600 text-white px-4 py-2 rounded hover:bg-gray-700 w-full hidden">
+        🎥 Capture Live Photo
+      </button>
+
+      <!-- Live camera -->
+      <video id="video" class="hidden w-full mt-2 rounded" autoplay></video>
+      <canvas id="canvas" class="hidden"></canvas>
+      <img id="preview" class="hidden mt-3 rounded shadow-lg">
+      <p id="timeDisplay" class="text-gray-600 text-sm mt-1 hidden"></p>
+    </div>
+
+    <!-- Submit -->
+    <input type="submit" value="Submit Issue"
+      class="bg-green-500 text-white px-4 py-2 rounded hover:bg-green-600 w-full">
+  </form>
+
+  <!-- JAVASCRIPT SECTION -->
   <script>
+    /* ------------------------- GET USER LOCATION -------------------------- */
     async function getLocation() {
       if (navigator.geolocation) {
         navigator.geolocation.getCurrentPosition(
@@ -113,7 +77,6 @@
             const lat = pos.coords.latitude;
             const lon = pos.coords.longitude;
 
-            // set hidden values
             document.getElementById("latitude").value = lat;
             document.getElementById("longitude").value = lon;
 
@@ -121,25 +84,125 @@
               const res = await fetch(`/reverse-geocode?lat=${lat}&lon=${lon}`);
               const data = await res.json();
 
-              if (data && data.display_name) {
-                document.getElementById("location").value = data.display_name;
-                document.getElementById("manualLocation").value = data.display_name;
-              } else {
-                document.getElementById("location").value = `${lat}, ${lon}`;
-                document.getElementById("manualLocation").value = `${lat}, ${lon}`;
-              }
+              const loc = data.display_name || `${lat}, ${lon}`;
+              document.getElementById("location").value = loc;
+              document.getElementById("manualLocation").value = loc;
+
             } catch (err) {
-              console.error("Reverse geocoding failed", err);
+              console.error("Reverse geocoding failed:", err);
               document.getElementById("location").value = `${lat}, ${lon}`;
               document.getElementById("manualLocation").value = `${lat}, ${lon}`;
             }
           },
           () => alert("Location access denied. Please type manually."),
-          { enableHighAccuracy: true, timeout: 10000, maximumAge: 0 }
+          { enableHighAccuracy: true, timeout: 10000 }
         );
       } else {
-        alert("Geolocation not supported in this browser.");
+        alert("Geolocation not supported.");
       }
+    }
+
+    /* ------------------------- WATERMARK + TIMESTAMP ---------------------- */
+    function addWatermarkToCanvas(canvas, ctx) {
+      const now = new Date();
+      const timestamp = now.toLocaleString();
+
+      document.getElementById("timestamp").value = timestamp;
+      document.getElementById("timeDisplay").innerText = "📅 Captured on: " + timestamp;
+      document.getElementById("timeDisplay").classList.remove("hidden");
+
+      ctx.font = "18px Arial";
+      ctx.fillStyle = "rgba(255,255,255,0.8)";
+      ctx.fillRect(canvas.width - 250, canvas.height - 35, 240, 28);
+
+      ctx.fillStyle = "black";
+      ctx.fillText(timestamp, canvas.width - 240, canvas.height - 15);
+    }
+
+    /* ------------------------- UPLOAD + WATERMARK -------------------------- */
+    const uploadInput = document.getElementById("uploadImage");
+    const preview = document.getElementById("preview");
+
+    uploadInput.addEventListener("change", () => {
+      const file = uploadInput.files[0];
+      if (!file) return;
+
+      const reader = new FileReader();
+      reader.onload = function (e) {
+        const img = new Image();
+        img.onload = function () {
+
+          const canvas = document.getElementById("canvas");
+          const ctx = canvas.getContext("2d");
+
+          canvas.width = img.width;
+          canvas.height = img.height;
+
+          ctx.drawImage(img, 0, 0);
+          addWatermarkToCanvas(canvas, ctx);
+
+          canvas.toBlob((blob) => {
+            const fileWithWatermark = new File([blob], "photo_with_watermark.png", { type: "image/png" });
+            const dt = new DataTransfer();
+            dt.items.add(fileWithWatermark);
+            uploadInput.files = dt.files;
+
+            preview.src = URL.createObjectURL(fileWithWatermark);
+            preview.classList.remove("hidden");
+          });
+        };
+        img.src = e.target.result;
+      };
+      reader.readAsDataURL(file);
+    });
+
+    /* ------------------------- CAPTURE LIVE PHOTO -------------------------- */
+    const captureBtn = document.getElementById("captureBtn");
+    const video = document.getElementById("video");
+    const canvas = document.getElementById("canvas");
+
+    captureBtn.addEventListener("click", async () => {
+      if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+        alert("Camera not supported on this device.");
+        return;
+      }
+
+      const stream = await navigator.mediaDevices.getUserMedia({ video: true });
+      video.srcObject = stream;
+      video.classList.remove("hidden");
+
+      alert("📸 Tap on the video to capture photo");
+
+      video.addEventListener("click", () => {
+        canvas.width = video.videoWidth;
+        canvas.height = video.videoHeight;
+
+        const ctx = canvas.getContext("2d");
+        ctx.drawImage(video, 0, 0);
+
+        // STOP camera
+        stream.getTracks().forEach(t => t.stop());
+        video.classList.add("hidden");
+
+        addWatermarkToCanvas(canvas, ctx);
+
+        canvas.toBlob((blob) => {
+          const file = new File([blob], "captured_with_watermark.png", { type: "image/png" });
+          const dt = new DataTransfer();
+          dt.items.add(file);
+          uploadInput.files = dt.files;
+
+          preview.src = URL.createObjectURL(file);
+          preview.classList.remove("hidden");
+        });
+      });
+    });
+
+    /* -------- Show capture button ONLY on mobile ------------ */
+    const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+    if (isMobile) {
+      document.getElementById("captureBtn").classList.remove("hidden");
+      uploadInput.setAttribute("capture", "environment");
     }
   </script>
 
