@@ -19,7 +19,7 @@
     }
     header h2 { margin: 0; font-size: 28px; }
     .stats {
-      display: flex; justify-content: center; flex-wrap:  nowrap;
+      display: flex; justify-content: center; flex-wrap: nowrap;
       gap: 25px; margin: 25px auto; max-width: 800px;
     }
     .stat-card {
@@ -49,7 +49,6 @@
       max-width: 100%; height: auto;
       border-radius: 6px; margin-top: 8px;
     }
-    .issue-card form { display: inline-block; margin-top: 8px; }
     .btn {
       padding: 6px 12px; border: none; border-radius: 5px;
       cursor: pointer; font-size: 13px; color: white;
@@ -60,13 +59,66 @@
     .btn-success:hover { background: #2e7d32; }
     .btn-danger:hover { background: #c62828; }
     .btn-primary:hover { background: #1565c0; }
+
+    /* Popup */
+    #resolvePopup {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.6);
+      justify-content: center;
+      align-items: center;
+      z-index: 999;
+      backdrop-filter: blur(4px);
+    }
+    #popupBox {
+      background: linear-gradient(135deg, #ffffff, #f3f9ff);
+      border-radius: 16px;
+      box-shadow: 0 10px 25px rgba(0,0,0,0.25);
+      padding: 25px 25px 30px;
+      width: 380px;
+      text-align: center;
+      animation: scaleUp 0.3s ease-in-out forwards;
+    }
+    @keyframes scaleUp {
+      from { transform: scale(0.9); opacity: 0; }
+      to { transform: scale(1); opacity: 1; }
+    }
+    #popupBox h3 {
+      margin-top: 0;
+      color: #1565c0;
+      font-size: 22px;
+      text-transform: uppercase;
+    }
+    #popupBox p {
+      color: #555; font-size: 14px; margin-bottom: 15px;
+    }
+    video {
+      width: 100%; border-radius: 8px; border: 2px solid #2e7d32;
+    }
+    .popup-buttons { margin-top: 15px; }
+    .submitBtn, .cancelBtn {
+      border: none; border-radius: 8px;
+      padding: 10px 18px; color: white;
+      font-weight: bold; cursor: pointer;
+      transition: all 0.25s ease-in-out;
+    }
+    .submitBtn {
+      background: linear-gradient(135deg, #43a047, #2e7d32);
+      box-shadow: 0 3px 6px rgba(46,125,50,0.3);
+    }
+    .submitBtn:hover { background: linear-gradient(135deg, #66bb6a, #43a047); transform: scale(1.05); }
+    .cancelBtn {
+      background: linear-gradient(135deg, #e53935, #b71c1c);
+      box-shadow: 0 3px 6px rgba(183,28,28,0.3);
+      margin-left: 10px;
+    }
+    .cancelBtn:hover { background: linear-gradient(135deg, #ef5350, #c62828); transform: scale(1.05); }
   </style>
 </head>
 <body>
 
-<header>
-  <h2>Admin Dashboard</h2>
-</header>
+<header><h2>Admin Dashboard</h2></header>
 
 <!-- Stats -->
 <div class="stats">
@@ -92,19 +144,15 @@
         <% if(i.image){ %>
           <img src="<%= i.image %>" alt="Issue Photo">
         <% } %>
-        <p><strong>Description:</strong><%= i.description %></p>
+        <p><strong>Description:</strong> <%= i.description %></p>
         <p><strong>Status:</strong> <%= i.status %></p>
         <p><strong>Priority:</strong> <%= i.priority || "N/A" %></p>
         <p><strong>Category:</strong> <%= i.category || "N/A" %></p>
-
         <% if(i.location){ %>
           <p><strong>Location:</strong> <%= i.location %></p>
         <% } %>
-
         <% if(i.createdAt){ %>
-          <p><strong>Date & Time:</strong>
-            <%= new Date(i.createdAt).toLocaleString() %>
-          </p>
+          <p><strong>Date & Time:</strong> <%= new Date(i.createdAt).toLocaleString() %></p>
         <% } %>
 
         <% if(i.status === 'pending'){ %>
@@ -115,9 +163,7 @@
             <button type="submit" class="btn btn-danger">Reject</button>
           </form>
         <% } else if(i.status === 'approved'){ %>
-          <form action="/admin/issue/<%= i._id %>/resolve" method="POST">
-            <button type="submit" class="btn btn-primary">Resolve</button>
-          </form>
+          <button type="button" class="btn btn-primary" onclick="openResolvePopup('<%= i._id %>')">Resolve</button>
         <% } %>
       </div>
     <% }) %>
@@ -125,6 +171,103 @@
     <p style="text-align:center; font-size:16px;">No issues found.</p>
   <% } %>
 </div>
+
+<!-- Resolve Popup (Live Camera) -->
+<!-- 🌟 RESOLVE POPUP (Styled + Live Camera + Capture + Preview) -->
+<div id="resolvePopup" 
+     style="display:none; position:fixed; inset:0; background:#00000070; backdrop-filter:blur(4px); 
+            justify-content:center; align-items:center; z-index:999;">
+
+  <div style="background:white; width:380px; border-radius:14px; padding:25px; 
+              box-shadow:0 8px 20px rgba(0,0,0,0.25); text-align:center; animation:scaleUp .3s ease;">
+    
+    <h2 style="color:#1565c0; margin-top:0;">📸 Upload Live Resolved Photo</h2>
+    <p style="font-size:14px; color:#444;">Please capture a live photo confirming this issue is resolved.</p>
+
+    <!-- LIVE CAMERA -->
+   <button onclick="captureAndResolve()" class="submitBtn">📸 Capture Live Photo</button>
+<button onclick="closePopup()" class="cancelBtn">Cancel</button>
+
+<video id="cameraFeed" autoplay playsinline style="width:100%;border-radius:10px;"></video>
+<canvas id="photoCanvas" style="display:none;"></canvas>
+
+
+    <input type="hidden" id="resolvedData">
+    <input type="hidden" id="resolveIssueId">
+    <input type="hidden" id="adminLat">
+    <input type="hidden" id="adminLon">
+    <input type="hidden" id="adminTime">
+
+  </div>
+</div>
+
+<style>
+@keyframes scaleUp {
+  from { transform:scale(.9); opacity:0; }
+  to { transform:scale(1); opacity:1; }
+}
+</style>
+
+
+<script>
+let stream;
+
+// Open popup + start camera
+function openResolvePopup(issueId) {
+  document.getElementById("resolveIssueId").value = issueId;
+  document.getElementById("resolvePopup").style.display = "flex";
+
+  const video = document.getElementById("cameraFeed");
+
+  navigator.mediaDevices.getUserMedia({ video: true })
+    .then(s => {
+      stream = s;
+      video.srcObject = stream;
+    })
+    .catch(() => alert("Camera permission required"));
+}
+
+function closePopup() {
+  document.getElementById("resolvePopup").style.display = "none";
+  if (stream) {
+    stream.getTracks().forEach(track => track.stop());
+  }
+}
+
+// Capture → convert to base64 → auto upload
+async function captureAndResolve() {
+  const issueId = document.getElementById("resolveIssueId").value;
+  const video = document.getElementById("cameraFeed");
+  const canvas = document.getElementById("photoCanvas");
+
+  // Draw frame on canvas
+  const ctx = canvas.getContext("2d");
+  canvas.width = video.videoWidth;
+  canvas.height = video.videoHeight;
+  ctx.drawImage(video, 0, 0);
+
+  // Convert to base64
+  const imageData = canvas.toDataURL("image/jpeg");
+
+  // Auto-send to backend
+  let res = await fetch(`/admin/resolve/${issueId}`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ resolvedImage: imageData })
+  });
+
+  let data = await res.json();
+
+  if (data.success) {
+    alert("✅ Issue resolved successfully & email sent!");
+    closePopup();
+    location.reload();
+  } else {
+    alert("Upload failed! " + data.msg);
+  }
+}
+</script>
+
 
 </body>
 </html>

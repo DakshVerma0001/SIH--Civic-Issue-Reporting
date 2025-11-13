@@ -5,73 +5,267 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Login - Civic Issue Reporting</title>
   <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
     body {
       margin: 0;
-      font-family: Arial, sans-serif;
-      background: linear-gradient(to bottom right, #4CAF50, #2196F3); /* green → blue */
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background: linear-gradient(135deg, #4CAF50, #2196F3, #673AB7);
+      background-size: 400% 400%;
+      animation: gradientShift 15s ease infinite;
       height: 100vh;
       display: flex;
       justify-content: center;
       align-items: center;
+      position: relative;
+      overflow: hidden;
     }
 
+    /* Animated gradient background */
+    @keyframes gradientShift {
+      0% { background-position: 0% 50%; }
+      50% { background-position: 100% 50%; }
+      100% { background-position: 0% 50%; }
+    }
+
+    /* Floating particles */
+    body::before {
+      content: '';
+      position: absolute;
+      width: 400px;
+      height: 400px;
+      background: rgba(255, 255, 255, 0.1);
+      border-radius: 50%;
+      top: -100px;
+      left: -100px;
+      animation: float 20s infinite ease-in-out;
+      z-index: 0;
+    }
+
+    body::after {
+      content: '';
+      position: absolute;
+      width: 300px;
+      height: 300px;
+      background: rgba(255, 255, 255, 0.08);
+      border-radius: 50%;
+      bottom: -80px;
+      right: -80px;
+      animation: float 15s infinite ease-in-out reverse;
+      z-index: 0;
+    }
+
+    @keyframes float {
+      0%, 100% { transform: translate(0, 0) scale(1); }
+      33% { transform: translate(50px, -50px) scale(1.1); }
+      66% { transform: translate(-50px, 50px) scale(0.9); }
+    }
+
+    /* Glassmorphism container */
     .login-container {
-      background: #ffffff;
-      padding: 40px 30px;
-      border-radius: 12px;
-      box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+      position: relative;
+      z-index: 1;
+      background: rgba(255, 255, 255, 0.15);
+      backdrop-filter: blur(15px);
+      -webkit-backdrop-filter: blur(15px);
+      padding: 50px 40px;
+      border-radius: 20px;
+      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2),
+                  0 0 0 1px rgba(255, 255, 255, 0.3) inset;
       width: 100%;
-      max-width: 400px;
+      max-width: 420px;
       text-align: center;
+      animation: slideIn 0.6s ease-out;
+      border: 1px solid rgba(255, 255, 255, 0.3);
+    }
+
+    @keyframes slideIn {
+      from {
+        opacity: 0;
+        transform: translateY(30px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
     }
 
     h2 {
-      margin-bottom: 1.5rem;
-      color: #2196F3;
-      font-size: 1.8rem;
+      margin-bottom: 2rem;
+      color: #ffffff;
+      font-size: 2rem;
+      font-weight: 700;
+      text-shadow: 2px 2px 8px rgba(0, 0, 0, 0.2);
+      letter-spacing: 0.5px;
+      animation: fadeIn 1s ease-out 0.2s both;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; }
+      to { opacity: 1; }
+    }
+
+    /* Input wrapper for animation */
+    .input-wrapper {
+      position: relative;
+      margin-bottom: 25px;
+      animation: fadeIn 1s ease-out 0.4s both;
     }
 
     input[type="email"],
     input[type="password"] {
       width: 100%;
-      padding: 12px;
-      margin: 10px 0;
-      border: 1px solid #ccc;
-      border-radius: 8px;
+      padding: 15px 20px;
+      border: 2px solid rgba(255, 255, 255, 0.3);
+      border-radius: 12px;
       font-size: 1rem;
+      background: rgba(255, 255, 255, 0.2);
+      color: #ffffff;
+      transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+      outline: none;
+      font-weight: 500;
+    }
+
+    input[type="email"]::placeholder,
+    input[type="password"]::placeholder {
+      color: rgba(255, 255, 255, 0.7);
+      font-weight: 400;
+    }
+
+    input[type="email"]:focus,
+    input[type="password"]:focus {
+      border-color: rgba(255, 255, 255, 0.8);
+      background: rgba(255, 255, 255, 0.25);
+      box-shadow: 0 0 20px rgba(255, 255, 255, 0.3),
+                  0 0 0 4px rgba(255, 255, 255, 0.1);
+      transform: translateY(-2px);
+    }
+
+    /* Animated border on focus */
+    .input-wrapper::after {
+      content: '';
+      position: absolute;
+      bottom: 0;
+      left: 50%;
+      width: 0;
+      height: 2px;
+      background: linear-gradient(90deg, #4CAF50, #2196F3);
+      transition: all 0.4s ease;
+      transform: translateX(-50%);
+    }
+
+    .input-wrapper:focus-within::after {
+      width: 100%;
+    }
+
+    /* Submit button */
+    .btn-wrapper {
+      animation: fadeIn 1s ease-out 0.6s both;
     }
 
     input[type="submit"] {
       width: 100%;
-      padding: 12px;
-      background: #4CAF50;
+      padding: 15px;
+      background: linear-gradient(135deg, #4CAF50, #45a049);
       color: white;
-      font-size: 1.1rem;
+      font-size: 1.15rem;
+      font-weight: 600;
       border: none;
-      border-radius: 8px;
+      border-radius: 12px;
       cursor: pointer;
-      transition: background 0.3s ease;
+      transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
       margin-top: 10px;
+      box-shadow: 0 4px 15px rgba(76, 175, 80, 0.4);
+      position: relative;
+      overflow: hidden;
+      letter-spacing: 0.5px;
+    }
+
+    /* Button shimmer effect */
+    input[type="submit"]::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: -100%;
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
+      transition: left 0.6s ease;
+    }
+
+    input[type="submit"]:hover::before {
+      left: 100%;
     }
 
     input[type="submit"]:hover {
-      background: #45a049;
+      background: linear-gradient(135deg, #45a049, #4CAF50);
+      transform: translateY(-3px);
+      box-shadow: 0 6px 25px rgba(76, 175, 80, 0.5);
     }
 
+    input[type="submit"]:active {
+      transform: translateY(-1px);
+      box-shadow: 0 3px 15px rgba(76, 175, 80, 0.4);
+    }
+
+    /* Register link section */
     p {
-      margin-top: 15px;
-      font-size: 0.9rem;
-      color: #333;
+      margin-top: 25px;
+      font-size: 1rem;
+      color: rgba(255, 255, 255, 0.9);
+      font-weight: 500;
+      animation: fadeIn 1s ease-out 0.8s both;
     }
 
     a {
-      color: #2196F3;
+      color: #ffffff;
       text-decoration: none;
-      font-weight: bold;
+      font-weight: 700;
+      transition: all 0.3s ease;
+      position: relative;
+      padding-bottom: 2px;
+    }
+
+    a::after {
+      content: '';
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      width: 0;
+      height: 2px;
+      background: #ffffff;
+      transition: width 0.3s ease;
+    }
+
+    a:hover::after {
+      width: 100%;
     }
 
     a:hover {
-      text-decoration: underline;
+      text-shadow: 0 0 10px rgba(255, 255, 255, 0.8);
+    }
+
+    /* Responsive design */
+    @media(max-width: 480px) {
+      .login-container {
+        padding: 40px 30px;
+        max-width: 90%;
+      }
+
+      h2 {
+        font-size: 1.6rem;
+      }
+
+      input[type="email"],
+      input[type="password"],
+      input[type="submit"] {
+        font-size: 0.95rem;
+        padding: 12px 16px;
+      }
     }
   </style>
 </head>
@@ -80,9 +274,15 @@
   <div class="login-container">
     <h2>Login to Your Account</h2>
     <form action="/login" method="post">
-      <input type="email" name="email" placeholder="Enter your email" required>
-      <input type="password" name="password" placeholder="Enter your password" required>
-      <input type="submit" value="Login">
+      <div class="input-wrapper">
+        <input type="email" name="email" placeholder="Enter your email" required>
+      </div>
+      <div class="input-wrapper">
+        <input type="password" name="password" placeholder="Enter your password" required>
+      </div>
+      <div class="btn-wrapper">
+        <input type="submit" value="Login">
+      </div>
     </form>
     <p>Don't have an account? <a href="/register">Register here</a></p>
   </div>

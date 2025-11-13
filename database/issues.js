@@ -42,6 +42,14 @@ const issueSchema = new mongoose.Schema(
       type: String, // e.g., "Road", "Water", etc.
       default: "General",
     },
+    //user confirmation 
+    userConfirmation: {
+      type: String,
+      enum: ["pending", "confirmed", "rejected"],
+      default: "pending"
+    },
+    userFeedbackImage: { type: String }, // User's uploaded "not resolved" photo
+    userFeedbackDate: { type: Date },
 
     // Custom ID for public reference
     customId: {
