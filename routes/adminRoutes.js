@@ -202,6 +202,81 @@ router.get("/issue/:customId/confirm", async (req, res) => {
   }
 });
 
+//csv
+router.get('/export/csv', async (req, res) => {
+  try {
+    const issues = await Issue.find().lean();
+
+    let csv = "Title,Status,Priority,Category,Description,Location,CreatedAt\n";
+
+    issues.forEach(i => {
+      csv += `"${i.title}","${i.status}","${i.priority || ''}","${i.category || ''}",
+      "${i.description}","${i.location || ''}","${i.createdAt}"\n`;
+    });
+
+    res.setHeader("Content-Type", "text/csv");
+    res.setHeader("Content-Disposition", "attachment; filename=issues.csv");
+    res.send(csv);
+
+  } catch (err) {
+    console.log(err);
+    res.status(500).send("CSV generation failed");
+  }
+});
+ //excel 
+import ExcelJS from "exceljs";
+
+router.get('/export/excel', async (req, res) => {
+  try {
+    const issues = await Issue.find().lean();
+
+    const workbook = new ExcelJS.Workbook();
+    const sheet = workbook.addWorksheet("Issues");
+
+    // Define columns including Latitude + Longitude
+    sheet.columns = [
+      { header: "Title", key: "title", width: 20 },
+      { header: "Status", key: "status", width: 15 },
+      { header: "Priority", key: "priority", width: 15 },
+      { header: "Category", key: "category", width: 20 },
+      { header: "Description", key: "description", width: 40 },
+      { header: "Location", key: "location", width: 25 },
+      { header: "Latitude", key: "latitude", width: 15 },
+      { header: "Longitude", key: "longitude", width: 15 },
+      { header: "Created At", key: "createdAt", width: 20 }
+    ];
+
+    // Add each issue row including lat/lon
+    issues.forEach(i => {
+      sheet.addRow({
+        title: i.title,
+        status: i.status,
+        priority: i.priority || "",
+        category: i.category || "",
+        description: i.description,
+        location: i.location || "",
+        latitude: i.latitude || "",
+        longitude: i.longitude || "",
+        createdAt: i.createdAt
+      });
+    });
+
+    res.setHeader(
+      "Content-Type",
+      "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+    );
+    res.setHeader("Content-Disposition", "attachment; filename=issues.xlsx");
+
+    await workbook.xlsx.write(res);
+    res.end();
+
+  } catch (err) {
+    console.error(err);
+    res.status(500).send("Error generating Excel");
+  }
+});
+
+
 /* ========== USER LIVE PHOTO UPLOAD ========== */
 router.post("/issue/:customId/uploadFeedback", async (req, res) => {
   try {

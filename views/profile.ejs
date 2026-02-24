@@ -116,29 +116,31 @@
     }
 
     /* Left Card */
-    .profile-card {
-      background: linear-gradient(180deg, rgba(220, 231, 200, 0.98), rgba(200, 220, 180, 0.98));
-      backdrop-filter: blur(20px);
-      -webkit-backdrop-filter: blur(20px);
-      padding: 20px 18px;
-      border-radius: 16px;
-      box-shadow: 0 10px 35px rgba(0, 0, 0, 0.25);
-      border: 1px solid rgba(255, 255, 255, 0.4);
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      gap: 16px;
-    }
+      .profile-card {
+    background: linear-gradient(180deg, rgba(220, 231, 200, 0.98), rgba(200, 220, 180, 0.98));
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    padding: 20px 18px;
+    border-radius: 16px;
+    box-shadow: 0 10px 35px rgba(0,0,0,0.25);
+    border: 1px solid rgba(255, 255, 255, 0.4);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    position: relative;
+    min-height: 420px;
+    justify-content: flex-start;
+  }
 
-    .profile-pic {
-      border-radius: 50%;
-      object-fit: cover;
-      border: 4px solid transparent;
-      background: linear-gradient(white, white) padding-box,
-                  linear-gradient(135deg, #11998e, #38ef7d) border-box;
-      box-shadow: 0 8px 25px rgba(17, 153, 142, 0.5);
-      transition: all 0.4s ease;
-    }
+   .profile-pic {
+    border-radius: 50%;
+    object-fit: cover;
+    border: 4px solid transparent;
+    background: linear-gradient(white, white) padding-box, linear-gradient(135deg, #051c4e, #065f0e) border-box;
+    box-shadow: 0 8px 25px rgba(17,153,142,0.5);
+    margin-top: 8px;
+    transition: all 0.4s ease;
+  }
 
     .profile-pic:hover {
       transform: scale(1.08) rotate(5deg);
@@ -147,35 +149,49 @@
 
     /* Action Buttons */
     .actions {
-      display: flex;
-      flex-direction: column;
-      gap: 8px;
-      width: 100%;
-    }
-
-    .actions a {
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-      gap: 6px;
-      padding: 9px 16px;
-      background: linear-gradient(135deg, rgba(46, 125, 50, 0.98), rgba(67, 160, 71, 0.98));
-      backdrop-filter: blur(10px);
-      color: white;
-      border-radius: 10px;
-      text-decoration: none;
-      font-weight: 600;
-      font-size: 0.85rem;
-      transition: all 0.4s ease;
-      box-shadow: 0 4px 15px rgba(46, 125, 50, 0.5);
-      border: 1px solid rgba(255, 255, 255, 0.3);
-    }
+    display: flex;
+    flex-direction: column;
+    gap: 18px;
+    align-items: center;
+    width: 100%;
+    margin-top: 55px;
+  }
+     .actions a {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: 42px;
+    min-width: 190px;
+    max-width: 190px;
+    background: linear-gradient(90deg, #133515 80%, #21643d 100%);
+    color: #fff;
+    font-weight: 600;
+    font-size: 15px;
+    border: none;
+    border-radius: 12px;
+    box-shadow: 0 4px 18px rgba(21,71,24,0.15);
+    transition: background 0.3s, transform 0.2s;
+    text-decoration: none;
+    letter-spacing: 0.5px;
+  }
 
     .actions a:hover {
       transform: translateY(-3px);
       box-shadow: 0 6px 20px rgba(46, 125, 50, 0.6);
-      background: linear-gradient(135deg, rgba(67, 160, 71, 1), rgba(102, 187, 106, 1));
+      background: linear-gradient(135deg, rgb(24, 56, 3), rgba(102, 187, 106, 1));
     }
+    .actions a:hover {
+    background: linear-gradient(90deg, #21643d 80%, #2538B8 100%);
+    transform: translateY(-2px) scale(1.04);
+  }
+  @media (max-width:400px){
+    .actions a{
+      min-width:140px;
+      max-width:140px;
+      font-size: 14px;
+      height:38px;
+    }
+  }
 
     /* Right Card */
     .details-card {
@@ -279,6 +295,9 @@
       box-shadow: 0 10px 35px rgba(0, 0, 0, 0.25);
       transition: all 0.4s ease;
       border: 1px solid rgba(152, 251, 152, 0.4);
+      display: flex;
+      flex-direction: column;
+      min-height: 400px;
     }
 
     .issue-card:hover {
@@ -331,14 +350,19 @@
       text-decoration: underline;
     }
 
+    /* UPDATED: Issue Actions - Positioned in Corners */
     .issue-actions {
       display: flex;
+      flex-direction: row;
+      align-items: center;
+      justify-content: space-between;
       gap: 10px;
-      margin-top: 10px;
+      margin-top: auto;
+      padding-top: 15px;
     }
 
     .edit-link {
-      padding: 7px 16px;
+      padding: 8px 18px;
       background: rgba(17, 153, 142, 0.98);
       color: white !important;
       border-radius: 20px;
@@ -348,6 +372,10 @@
       box-shadow: 0 3px 12px rgba(17, 153, 142, 0.5);
       text-decoration: none;
       border: 1px solid rgba(255, 255, 255, 0.3);
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      min-width: 70px;
     }
 
     .edit-link:hover {
@@ -357,7 +385,7 @@
     }
 
     .delete-btn {
-      padding: 7px 16px;
+      padding: 8px 18px;
       background: rgba(46, 125, 50, 0.98);
       color: white;
       border: none;
@@ -368,6 +396,10 @@
       transition: all 0.3s ease;
       box-shadow: 0 3px 12px rgba(46, 125, 50, 0.5);
       border: 1px solid rgba(255, 255, 255, 0.3);
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      min-width: 90px;
     }
 
     .delete-btn:hover {
@@ -403,13 +435,13 @@
       }
 
       .issue-actions {
-        flex-direction: column;
+        flex-direction: row;
+        justify-content: space-between;
       }
 
       .edit-link,
       .delete-btn {
-        width: 100%;
-        text-align: center;
+        min-width: 60px;
       }
     }
   </style>
@@ -432,9 +464,9 @@
              alt="Profile pic" width="110" height="110">
 
         <div class="actions">
-          <a href="/profile/edit"><span>✏</span> <span>Edit Profile</span></a>
-          <a href="/logout"><span>🚪</span> <span>Logout</span></a>
-          <a href="/post"><span>➕</span> <span>Post New Issue</span></a>
+          <a href="/profile/edit"><span>EDIT PROFILE</span></a>
+          <a href="/logout"> <span>LOGOUT</span></a>
+          <a href="/post"> <span>POST NEW ISSUE</span></a>
         </div>
       </div>
 
@@ -491,7 +523,7 @@
             
             <div class="issue-actions">
               <a href="/issue/edit/<%= issue._id%>" class="edit-link">Edit</a>
-              <form action="/issue/delete/<%= issue._id %>" method="POST" style="display:inline;">
+              <form action="/issue/delete/<%= issue._id %>" method="POST" style="display:inline; margin: 0;">
                 <button type="submit" class="delete-btn">🗑 Delete</button>
               </form>
             </div>

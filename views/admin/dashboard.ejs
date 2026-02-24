@@ -6,258 +6,335 @@
   <title>Admin Dashboard</title>
   <style>
     body {
-      font-family: Arial, sans-serif;
+      font-family: 'Segoe UI', Arial, sans-serif;
+      background: url('/images/uploads/backImg.jpg') no-repeat center center fixed;
+      background-size: 100% 100%;
       margin: 0;
-      background: linear-gradient(135deg, #e8f5e9, #e3f2fd);
-      color: #333;
+      min-height: 100vh;
+      color: #183443;
+      overflow-x: hidden;
     }
-    header {
-      background: #2e7d32;
-      padding: 20px;
+    .dashboard-outer {
+      width: 100vw;
+      padding: 0;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 32px;
+    }
+    .stats-container, .issues-container {
+      width: 1120px;
+      max-width: 98vw;
+      margin: 0 auto;
+      border-radius: 32px;
+      box-shadow: 0 8px 34px 4px rgba(32,120,180,.09);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+    .stats-container {
+      background: rgba(198, 245, 200, 0.94); 
+      padding: 20px 38px 16px 38px;
+      min-height: 100px;
+      position: relative;
+    }
+    .dashboard-heading {
+      width: 100%;
+      max-width: 350px;
+      margin: 0 auto 20px auto;
+      font-size: 2.2em;
+      font-weight: 900;
+      color: #2a6ed7;
+      letter-spacing: 1.22px;
       text-align: center;
-      color: white;
+      text-shadow: 0 2px 10px rgba(30,120,240,0.09);
+      padding-top: 1px;
     }
-    header h2 { margin: 0; font-size: 28px; }
-    .stats {
-      display: flex; justify-content: center; flex-wrap: nowrap;
-      gap: 25px; margin: 25px auto; max-width: 800px;
+    /* Stat grid spanning full width */
+    .stats-row {
+      width: 100%;
+      display: grid;
+      grid-template-columns: repeat(5, 1fr);
+      gap: 22px;
+      justify-content: center;
+      margin: 0 auto 13px auto;
+      align-items: stretch;
     }
     .stat-card {
-      background: white; padding: 15px 25px; border-radius: 8px;
-      box-shadow: 0 2px 6px rgba(0,0,0,0.1);
-      font-size: 18px; font-weight: bold; min-width: 120px; text-align: center;
+      border-radius: 14px;
+      background:  #033509;
+      font-size: 15.7px;
+      font-weight: 700;
+      color: #e2ece9;
+      padding: 14px 0 10px 0;
+      text-align: center;
+      box-shadow: 0 2.5px 7px rgba(70,160,130,0.09);
+      border: 1px solid #d7eefa;
+      min-width: 0;
+      width: 80%;
+      letter-spacing: 0.06em;
+      line-height: 1.21;
+      transition: background 0.12s;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
     }
-    .actions { text-align: center; margin-bottom: 25px; }
+    .stat-card span {
+      font-size: 23.5px;
+      color: #2793fa;
+      font-weight: 900;
+      display: block;
+      margin-top: 1.7px;
+    }
+    .actions {
+      margin-top: 13px;
+      gap: 19px;
+      display: flex;
+      justify-content: center;
+      width: 100%;
+    }
     .actions a {
-      display: inline-block; margin: 0 10px; padding: 10px 18px;
-      text-decoration: none; color: white; border-radius: 6px; font-size: 15px;
+      padding: 12px 28px;
+      font-size: 15px;
+      border-radius: 8px;
+      font-weight: 700;
+      color: #fff;
+      background: linear-gradient(95deg, #136d17 82%, #011d41 120%);
+      text-decoration: none;
+      box-shadow: 0 2px 10px rgba(30,120,220,0.08);
+      transition: filter .11s;
+      display: flex; align-items: center; border: none;
+      margin-right: 3px;
     }
-    .csv-btn { background: #2e7d32; }
-    .excel-btn { background: #1e88e5; }
-    .issue-container {
-      display: flex; flex-wrap: wrap; gap: 25px;
-      justify-content: center; padding: 0 20px 40px;
+    .actions .excel-btn {background: linear-gradient(98deg, #256be2 60%, #5bc8f7 120%);}
+    .actions a:hover { filter: brightness(1.09);}
+    /* Issues Container - greenish */
+    .issues-container {
+      background: rgba(216, 241, 183, 0.97);  /* green shade */
+      padding: 37px 50px 32px 50px;
+      min-height: 340px;
+    }
+    .issues-grid {
+      width: 100%;
+      display: grid;
+      grid-template-columns: repeat(3,1fr);
+      gap: 36px 30px;
+      margin-top: 2px;
+      margin-bottom: 0;
     }
     .issue-card {
-      background: white; border-radius: 10px;
-      box-shadow: 0 3px 8px rgba(0,0,0,0.1);
-      width: 280px; padding: 18px; position: relative;
+      background: #fff;
+      border-radius: 21px;
+      box-shadow: 0 6px 24px rgba(30,150,50,0.13);
+      padding: 24px 21px 13px;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      border: 1.5px solid #defde5;
+      align-items: flex-start;
+      min-width: 0;
+      min-height: 370px;
+      position:relative;
+      transition: box-shadow 0.14s;
     }
-    .issue-card h4 { margin: 0 0 8px; color: #2e7d32; }
-    .issue-card p { margin: 6px 0; font-size: 14px; }
     .issue-card img {
-      max-width: 100%; height: auto;
-      border-radius: 6px; margin-top: 8px;
+      width: 100%;
+      height: 125px;
+      object-fit: cover;
+      border-radius: 15px;
+      margin-bottom: 6px;
+      box-shadow: 0 2px 6px rgba(33,150,243,0.10);
+    }
+    .issue-card h4 {
+      font-size: 1.13em;
+      font-weight: 700;
+      color: #074c96;
+      margin: 3px 0 2px 0;
+      letter-spacing: 0.19px;
+      display: block;
+      line-height: 1.34;
+    }
+    .section-label {
+      color: #073f17;
+      font-size: 15px;
+      font-weight: 700;
+      margin: 5px 0 6px 0;
+    }
+    .issue-details p {
+      margin: 7px 0 0 0;
+      font-size: 15.2px;
+      font-weight: 400;
+      color: #25404f;
+      line-height: 1.58;
+      letter-spacing: .03em;
+      display: block;
+    }
+    .issue-details strong {
+      color: #073f17;
+      font-weight: 700;
+      margin-bottom: 1.5px;
+      font-size: 15.6px;
+    }
+    .issue-details em {
+      color: #050505;
+      font-size: .99em;
+      
+    }
+    .meta-block {
+      margin-top: 4px;
+      margin-bottom: 6px;
+      font-size: 14.5px;
+    }
+    .issue-actions {
+      display: flex;
+      gap: 7px;
+      margin-top: 11px;
     }
     .btn {
-      padding: 6px 12px; border: none; border-radius: 5px;
-      cursor: pointer; font-size: 13px; color: white;
+      padding: 8px 15px; border: none; border-radius: 7px;
+      font-size: 14px; color: #fff; font-weight: 600;
+      cursor: pointer;
+      outline: none;
+      background: linear-gradient(90deg,#10bc6d 74%, #2770c4 100%);
+      transition: filter 0.15s;
+      letter-spacing: .46px;
     }
-    .btn-success { background: #43a047; }
-    .btn-danger { background: #e53935; }
-    .btn-primary { background: #1e88e5; }
-    .btn-success:hover { background: #2e7d32; }
-    .btn-danger:hover { background: #c62828; }
-    .btn-primary:hover { background: #1565c0; }
-
-    /* Popup */
-    #resolvePopup {
-      display: none;
-      position: fixed;
-      inset: 0;
-      background: rgba(0,0,0,0.6);
-      justify-content: center;
-      align-items: center;
-      z-index: 999;
-      backdrop-filter: blur(4px);
+    .btn-success { background: linear-gradient(90deg, #43a047 74%, #7be1a4 100%);}
+    .btn-danger  { background: linear-gradient(90deg, #e53935 67%, #facfc7 100%);}
+    .btn-primary { background: linear-gradient(90deg, #1565c0 73%, #bcbefa 100%);}
+    .btn:hover { filter: brightness(1.13);}
+    @media (max-width:1170px){
+      .dashboard-outer,.stats-container,.issues-container { width:100vw; }
+      .stats-container,.issues-container { max-width:100vw; }
     }
-    #popupBox {
-      background: linear-gradient(135deg, #ffffff, #f3f9ff);
-      border-radius: 16px;
-      box-shadow: 0 10px 25px rgba(0,0,0,0.25);
-      padding: 25px 25px 30px;
-      width: 380px;
-      text-align: center;
-      animation: scaleUp 0.3s ease-in-out forwards;
+    @media (max-width:900px){
+      .stats-container,.issues-container{padding:11px 2vw;}
+      .issues-grid {grid-template-columns:1fr 1fr;gap:18px 8px;}
+      .issue-card {min-height: 280px;}
+      .dashboard-heading{font-size:1.3em;}
+      .stats-row{gap:11px;}
     }
-    @keyframes scaleUp {
-      from { transform: scale(0.9); opacity: 0; }
-      to { transform: scale(1); opacity: 1; }
+    @media (max-width:700px){
+      .issues-grid {grid-template-columns:1fr;}
+      .issue-card{padding:10px 5px;}
+      .stats-row{grid-template-columns:1fr;}
     }
-    #popupBox h3 {
-      margin-top: 0;
-      color: #1565c0;
-      font-size: 22px;
-      text-transform: uppercase;
-    }
-    #popupBox p {
-      color: #555; font-size: 14px; margin-bottom: 15px;
-    }
-    video {
-      width: 100%; border-radius: 8px; border: 2px solid #2e7d32;
-    }
-    .popup-buttons { margin-top: 15px; }
-    .submitBtn, .cancelBtn {
-      border: none; border-radius: 8px;
-      padding: 10px 18px; color: white;
-      font-weight: bold; cursor: pointer;
-      transition: all 0.25s ease-in-out;
-    }
-    .submitBtn {
-      background: linear-gradient(135deg, #43a047, #2e7d32);
-      box-shadow: 0 3px 6px rgba(46,125,50,0.3);
-    }
-    .submitBtn:hover { background: linear-gradient(135deg, #66bb6a, #43a047); transform: scale(1.05); }
-    .cancelBtn {
-      background: linear-gradient(135deg, #e53935, #b71c1c);
-      box-shadow: 0 3px 6px rgba(183,28,28,0.3);
-      margin-left: 10px;
-    }
-    .cancelBtn:hover { background: linear-gradient(135deg, #ef5350, #c62828); transform: scale(1.05); }
   </style>
 </head>
 <body>
+<div class="dashboard-outer">
 
-<header><h2>Admin Dashboard</h2></header>
+  <!-- First Container (Admin + Stats + Download) -->
+  <div class="stats-container">
+    <div class="dashboard-heading">Admin Dashboard</div>
+    <div class="stats-row">
+      <div class="stat-card">Total <span><%= counts.total %></span></div>
+      <div class="stat-card">Pending <span><%= counts.pending %></span></div>
+      <div class="stat-card">Approved <span><%= counts.approved %></span></div>
+      <div class="stat-card">Resolved <span><%= counts.resolved %></span></div>
+      <div class="stat-card">Rejected <span><%= counts.rejected %></span></div>
+    </div>
+    <div class="actions">
+      <a href="/admin/export/csv" class="csv-btn">⬇ Download CSV</a>
+      <a href="/admin/export/excel" class="excel-btn">⬇ Download Excel</a>
+    </div>
+  </div>
 
-<!-- Stats -->
-<div class="stats">
-  <div class="stat-card">Total: <%= counts.total %></div>
-  <div class="stat-card">Pending: <%= counts.pending %></div>
-  <div class="stat-card">Approved: <%= counts.approved %></div>
-  <div class="stat-card">Resolved: <%= counts.resolved %></div>
-  <div class="stat-card">Rejected: <%= counts.rejected %></div>
-</div>
-
-<!-- Download buttons -->
-<div class="actions">
-  <a href="/admin/export/csv" class="csv-btn">⬇ Download CSV</a>
-  <a href="/admin/export/excel" class="excel-btn">⬇ Download Excel</a>
-</div>
-
-<!-- Issues -->
-<div class="issue-container">
-  <% if (issues && issues.length > 0) { %>
-    <% issues.forEach(i => { %>
+  <!-- Second Container (Issues Grid) -->
+  <div class="issues-container">
+    <div class="issues-grid">
+      <% 
+      if (issues && issues.length > 0) { 
+        for(let idx=0; idx<issues.length; idx++){  
+          let i = issues[idx];
+      %>
       <div class="issue-card">
-        <h4><%= i.title %></h4>
         <% if(i.image){ %>
           <img src="<%= i.image %>" alt="Issue Photo">
         <% } %>
-        <p><strong>Description:</strong> <%= i.description %></p>
-        <p><strong>Status:</strong> <%= i.status %></p>
-        <p><strong>Priority:</strong> <%= i.priority || "N/A" %></p>
-        <p><strong>Category:</strong> <%= i.category || "N/A" %></p>
-        <% if(i.location){ %>
-          <p><strong>Location:</strong> <%= i.location %></p>
-        <% } %>
-        <% if(i.createdAt){ %>
-          <p><strong>Date & Time:</strong> <%= new Date(i.createdAt).toLocaleString() %></p>
-        <% } %>
-
+        <h4><%= i.title %></h4>
+        <div class="section-label"><b>GENERAL INFORMATION</b></div>
+        <div class="issue-details">
+          <p><strong>Description:</strong> <%= i.description %></p>
+          <div class="meta-block"><strong>Status:</strong> <%= i.status %></div>
+          <div class="meta-block"><strong>Priority:</strong> <em><%= i.priority || "N/A" %></em></div>
+          <div class="meta-block"><strong>Category:</strong> <em><%= i.category || "N/A" %></em></div>
+          <% if(i.location){ %>
+            <div class="meta-block"><strong>Location:</strong> <em><%= i.location %></em></div>
+          <% } %>
+          <% if(i.createdAt){ %>
+            <div class="meta-block"><strong>Date & Time:</strong> <em><%= new Date(i.createdAt).toLocaleString() %></em></div>
+          <% } %>
+        </div>
         <% if(i.status === 'pending'){ %>
-          <form action="/admin/issue/<%= i._id %>/approve" method="POST">
-            <button type="submit" class="btn btn-success">Approve</button>
-          </form>
-          <form action="/admin/issue/<%= i._id %>/reject" method="POST">
-            <button type="submit" class="btn btn-danger">Reject</button>
-          </form>
+          <div class="issue-actions">
+            <form action="/admin/issue/<%= i._id %>/approve" method="POST" style="display:inline;">
+              <button type="submit" class="btn btn-success">Approve</button>
+            </form>
+            <form action="/admin/issue/<%= i._id %>/reject" method="POST" style="display:inline;">
+              <button type="submit" class="btn btn-danger">Reject</button>
+            </form>
+          </div>
         <% } else if(i.status === 'approved'){ %>
-          <button type="button" class="btn btn-primary" onclick="openResolvePopup('<%= i._id %>')">Resolve</button>
+          <div class="issue-actions">
+            <button type="button" class="btn btn-primary" onclick="openResolvePopup('<%= i._id %>')">Resolve</button>
+          </div>
         <% } %>
       </div>
-    <% }) %>
-  <% } else { %>
-    <p style="text-align:center; font-size:16px;">No issues found.</p>
-  <% } %>
+      <% } } else { %>
+        <p style="text-align:center; font-size:16px;">No issues found.</p>
+      <% } %>
+    </div>
+  </div>
 </div>
-
-<!-- Resolve Popup (Live Camera) -->
-<!-- 🌟 RESOLVE POPUP (Styled + Live Camera + Capture + Preview) -->
+<!-- Popup, JS, etc. unchanged -->
 <div id="resolvePopup" 
-     style="display:none; position:fixed; inset:0; background:#00000070; backdrop-filter:blur(4px); 
+     style="display:none; position:fixed; inset:0; background:#00000070; backdrop-filter:blur(5px); 
             justify-content:center; align-items:center; z-index:999;">
-
-  <div style="background:white; width:380px; border-radius:14px; padding:25px; 
-              box-shadow:0 8px 20px rgba(0,0,0,0.25); text-align:center; animation:scaleUp .3s ease;">
-    
-    <h2 style="color:#1565c0; margin-top:0;">📸 Upload Live Resolved Photo</h2>
-    <p style="font-size:14px; color:#444;">Please capture a live photo confirming this issue is resolved.</p>
-
-    <!-- LIVE CAMERA -->
-   <button onclick="captureAndResolve()" class="submitBtn">📸 Capture Live Photo</button>
-<button onclick="closePopup()" class="cancelBtn">Cancel</button>
-
-<video id="cameraFeed" autoplay playsinline style="width:100%;border-radius:10px;"></video>
-<canvas id="photoCanvas" style="display:none;"></canvas>
-
-
+  <div id="popupBox" style="background:linear-gradient(135deg,#fff,#eef1fa 66%); border-radius:24px;box-shadow:0 10px 25px rgba(0,0,0,0.22);padding:33px 27px 29px;width:407px;text-align:center;animation:scaleUp 0.3s ease-in-out forwards;">
+    <h2>📸 Upload Live Resolved Photo</h2>
+    <p>Please capture a live photo confirming this issue is resolved.</p>
+    <button onclick="captureAndResolve()" class="submitBtn">📸 Capture Live Photo</button>
+    <button onclick="closePopup()" class="cancelBtn">Cancel</button>
+    <video id="cameraFeed" autoplay playsinline></video>
+    <canvas id="photoCanvas" style="display:none;"></canvas>
     <input type="hidden" id="resolvedData">
     <input type="hidden" id="resolveIssueId">
     <input type="hidden" id="adminLat">
     <input type="hidden" id="adminLon">
     <input type="hidden" id="adminTime">
-
   </div>
 </div>
-
-<style>
-@keyframes scaleUp {
-  from { transform:scale(.9); opacity:0; }
-  to { transform:scale(1); opacity:1; }
-}
-</style>
-
-
 <script>
 let stream;
-
-// Open popup + start camera
 function openResolvePopup(issueId) {
   document.getElementById("resolveIssueId").value = issueId;
   document.getElementById("resolvePopup").style.display = "flex";
-
   const video = document.getElementById("cameraFeed");
-
   navigator.mediaDevices.getUserMedia({ video: true })
-    .then(s => {
-      stream = s;
-      video.srcObject = stream;
-    })
+    .then(s => { stream = s; video.srcObject = stream; })
     .catch(() => alert("Camera permission required"));
 }
-
 function closePopup() {
   document.getElementById("resolvePopup").style.display = "none";
-  if (stream) {
-    stream.getTracks().forEach(track => track.stop());
-  }
+  if (stream) { stream.getTracks().forEach(track => track.stop()); }
 }
-
-// Capture → convert to base64 → auto upload
 async function captureAndResolve() {
   const issueId = document.getElementById("resolveIssueId").value;
   const video = document.getElementById("cameraFeed");
   const canvas = document.getElementById("photoCanvas");
-
-  // Draw frame on canvas
   const ctx = canvas.getContext("2d");
   canvas.width = video.videoWidth;
   canvas.height = video.videoHeight;
   ctx.drawImage(video, 0, 0);
-
-  // Convert to base64
   const imageData = canvas.toDataURL("image/jpeg");
-
-  // Auto-send to backend
   let res = await fetch(`/admin/resolve/${issueId}`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ resolvedImage: imageData })
   });
-
   let data = await res.json();
-
   if (data.success) {
     alert("✅ Issue resolved successfully & email sent!");
     closePopup();
@@ -267,7 +344,5 @@ async function captureAndResolve() {
   }
 }
 </script>
-
-
 </body>
 </html>

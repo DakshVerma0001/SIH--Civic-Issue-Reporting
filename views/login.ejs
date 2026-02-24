@@ -14,9 +14,9 @@
     body {
       margin: 0;
       font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-      background: linear-gradient(135deg, #4CAF50, #2196F3, #673AB7);
-      background-size: 400% 400%;
-      animation: gradientShift 15s ease infinite;
+      background: url('/images/uploads/backImg.jpg') no-repeat center center fixed;
+      background-size: 100% 100%;  /* Image fits all sides, no crop, no zoom */
+      background-color: #2196F3;   /* Fallback color if image fails */
       height: 100vh;
       display: flex;
       justify-content: center;
@@ -25,59 +25,20 @@
       overflow: hidden;
     }
 
-    /* Animated gradient background */
-    @keyframes gradientShift {
-      0% { background-position: 0% 50%; }
-      50% { background-position: 100% 50%; }
-      100% { background-position: 0% 50%; }
-    }
+    /* Existing fancy gradient/floating particles removed for real photo background */
 
-    /* Floating particles */
-    body::before {
-      content: '';
-      position: absolute;
-      width: 400px;
-      height: 400px;
-      background: rgba(255, 255, 255, 0.1);
-      border-radius: 50%;
-      top: -100px;
-      left: -100px;
-      animation: float 20s infinite ease-in-out;
-      z-index: 0;
-    }
-
-    body::after {
-      content: '';
-      position: absolute;
-      width: 300px;
-      height: 300px;
-      background: rgba(255, 255, 255, 0.08);
-      border-radius: 50%;
-      bottom: -80px;
-      right: -80px;
-      animation: float 15s infinite ease-in-out reverse;
-      z-index: 0;
-    }
-
-    @keyframes float {
-      0%, 100% { transform: translate(0, 0) scale(1); }
-      33% { transform: translate(50px, -50px) scale(1.1); }
-      66% { transform: translate(-50px, 50px) scale(0.9); }
-    }
-
-    /* Glassmorphism container */
     .login-container {
       position: relative;
       z-index: 1;
-      background: rgba(255, 255, 255, 0.15);
-      backdrop-filter: blur(15px);
-      -webkit-backdrop-filter: blur(15px);
+      background: #1f500329;
+      backdrop-filter: blur(60px);
+      -webkit-backdrop-filter: blur(20px);
       padding: 50px 40px;
       border-radius: 20px;
       box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2),
-                  0 0 0 1px rgba(255, 255, 255, 0.3) inset;
+        0 0 0 1px rgba(14, 87, 44, 0.3) inset;
       width: 100%;
-      max-width: 420px;
+      max-width: 470px;
       text-align: center;
       animation: slideIn 0.6s ease-out;
       border: 1px solid rgba(255, 255, 255, 0.3);
@@ -103,19 +64,15 @@
       letter-spacing: 0.5px;
       animation: fadeIn 1s ease-out 0.2s both;
     }
-
     @keyframes fadeIn {
       from { opacity: 0; }
       to { opacity: 1; }
     }
-
-    /* Input wrapper for animation */
     .input-wrapper {
       position: relative;
       margin-bottom: 25px;
       animation: fadeIn 1s ease-out 0.4s both;
     }
-
     input[type="email"],
     input[type="password"] {
       width: 100%;
@@ -124,28 +81,24 @@
       border-radius: 12px;
       font-size: 1rem;
       background: rgba(255, 255, 255, 0.2);
-      color: #ffffff;
+      color: #1f0909;
       transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
       outline: none;
       font-weight: 500;
     }
-
     input[type="email"]::placeholder,
     input[type="password"]::placeholder {
-      color: rgba(255, 255, 255, 0.7);
+      color: rgba(10, 49, 2, 0.507);
       font-weight: 400;
     }
-
     input[type="email"]:focus,
     input[type="password"]:focus {
       border-color: rgba(255, 255, 255, 0.8);
       background: rgba(255, 255, 255, 0.25);
       box-shadow: 0 0 20px rgba(255, 255, 255, 0.3),
-                  0 0 0 4px rgba(255, 255, 255, 0.1);
+        0 0 0 4px rgba(255, 255, 255, 0.1);
       transform: translateY(-2px);
     }
-
-    /* Animated border on focus */
     .input-wrapper::after {
       content: '';
       position: absolute;
@@ -157,16 +110,12 @@
       transition: all 0.4s ease;
       transform: translateX(-50%);
     }
-
     .input-wrapper:focus-within::after {
       width: 100%;
     }
-
-    /* Submit button */
     .btn-wrapper {
       animation: fadeIn 1s ease-out 0.6s both;
     }
-
     input[type="submit"] {
       width: 100%;
       padding: 15px;
@@ -184,8 +133,6 @@
       overflow: hidden;
       letter-spacing: 0.5px;
     }
-
-    /* Button shimmer effect */
     input[type="submit"]::before {
       content: '';
       position: absolute;
@@ -196,23 +143,18 @@
       background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
       transition: left 0.6s ease;
     }
-
     input[type="submit"]:hover::before {
       left: 100%;
     }
-
     input[type="submit"]:hover {
       background: linear-gradient(135deg, #45a049, #4CAF50);
       transform: translateY(-3px);
       box-shadow: 0 6px 25px rgba(76, 175, 80, 0.5);
     }
-
     input[type="submit"]:active {
       transform: translateY(-1px);
       box-shadow: 0 3px 15px rgba(76, 175, 80, 0.4);
     }
-
-    /* Register link section */
     p {
       margin-top: 25px;
       font-size: 1rem;
@@ -220,16 +162,14 @@
       font-weight: 500;
       animation: fadeIn 1s ease-out 0.8s both;
     }
-
     a {
-      color: #ffffff;
+      color: #3dbd67;
       text-decoration: none;
       font-weight: 700;
       transition: all 0.3s ease;
       position: relative;
       padding-bottom: 2px;
     }
-
     a::after {
       content: '';
       position: absolute;
@@ -240,26 +180,20 @@
       background: #ffffff;
       transition: width 0.3s ease;
     }
-
     a:hover::after {
       width: 100%;
     }
-
     a:hover {
       text-shadow: 0 0 10px rgba(255, 255, 255, 0.8);
     }
-
-    /* Responsive design */
     @media(max-width: 480px) {
       .login-container {
         padding: 40px 30px;
         max-width: 90%;
       }
-
       h2 {
         font-size: 1.6rem;
       }
-
       input[type="email"],
       input[type="password"],
       input[type="submit"] {
@@ -270,7 +204,6 @@
   </style>
 </head>
 <body>
-
   <div class="login-container">
     <h2>Login to Your Account</h2>
     <form action="/login" method="post">
@@ -286,6 +219,5 @@
     </form>
     <p>Don't have an account? <a href="/register">Register here</a></p>
   </div>
-
 </body>
 </html>
